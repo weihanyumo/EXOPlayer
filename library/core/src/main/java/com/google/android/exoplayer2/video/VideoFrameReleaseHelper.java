@@ -280,7 +280,9 @@ public final class VideoFrameReleaseHelper {
     // Find the timestamp of the closest vsync. This is the vsync that we're targeting.
     long snappedTimeNs = closestVsync(adjustedReleaseTimeNs, sampledVsyncTimeNs, vsyncDurationNs);
     // Apply an offset so that we release before the target vsync, but after the previous one.
-    return snappedTimeNs - vsyncOffsetNs;
+    long ret = snappedTimeNs - vsyncOffsetNs;
+    android.util.Log.d(TAG, "adjustReleaseTime: "+releaseTimeNs + " lastAdjustedReleaseTimeNs："+lastAdjustedReleaseTimeNs+ " adjustedReleaseTimeNs:"+adjustedReleaseTimeNs+" snappedTimeNs"+snappedTimeNs+ " ret:"+ret);
+    return ret;
   }
 
   private void resetAdjustment() {
@@ -406,14 +408,22 @@ public final class VideoFrameReleaseHelper {
     long snappedBeforeNs;
     long snappedAfterNs;
     if (releaseTime <= snappedTimeNs) {
+      android.util.Log.d(TAG, "closestVsync: release < snappedTime");
       snappedBeforeNs = snappedTimeNs - vsyncDuration;
       snappedAfterNs = snappedTimeNs;
     } else {
+      android.util.Log.d(TAG, "closestVsync: release > snappedTime");
       snappedBeforeNs = snappedTimeNs;
       snappedAfterNs = snappedTimeNs + vsyncDuration;
     }
+
     long snappedAfterDiff = snappedAfterNs - releaseTime;
     long snappedBeforeDiff = releaseTime - snappedBeforeNs;
+    String use = "useBefore";
+    if(snappedAfterDiff < snappedBeforeDiff){
+      use = "useAfter";
+    }
+    android.util.Log.d(TAG, "closestVsync releaseTime:"+releaseTime+" snappedBeforeNs"+snappedBeforeNs+" snappedAfterNs:"+snappedAfterNs+" "+ use);
     return snappedAfterDiff < snappedBeforeDiff ? snappedAfterNs : snappedBeforeNs;
   }
 
@@ -605,6 +615,7 @@ public final class VideoFrameReleaseHelper {
     @Override
     public void doFrame(long vsyncTimeNs) {
       sampledVsyncTimeNs = vsyncTimeNs;
+      android.util.Log.d(TAG, "doFrame: "+sampledVsyncTimeNs);
       checkNotNull(choreographer).postFrameCallbackDelayed(this, VSYNC_SAMPLE_UPDATE_PERIOD_MS);
     }
 

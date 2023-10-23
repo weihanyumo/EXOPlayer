@@ -27,6 +27,8 @@ import androidx.annotation.RequiresApi;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.decoder.CryptoInfo;
+import com.google.android.exoplayer2.video.VideoDecoderGLSurfaceView;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -244,6 +246,7 @@ public interface MediaCodecAdapter {
   @RequiresApi(23)
   void setOutputSurface(Surface surface);
 
+  void setGlSurfaceView(VideoDecoderGLSurfaceView surfaceView);
   /**
    * Communicate additional parameter changes to the {@link MediaCodec} instance.
    *

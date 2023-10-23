@@ -22,6 +22,7 @@ import static com.google.android.exoplayer2.decoder.DecoderReuseEvaluation.REUSE
 import static com.google.android.exoplayer2.util.Assertions.checkNotNull;
 import static com.google.android.exoplayer2.util.Assertions.checkState;
 import static com.google.android.exoplayer2.util.Assertions.checkStateNotNull;
+import static java.lang.Math.log;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -710,6 +711,10 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
 
   private void setOutput(@Nullable Object output) throws ExoPlaybackException {
     // Handle unsupported (i.e., non-Surface) outputs by clearing the display surface.
+    if(output instanceof VideoDecoderGLSurfaceView && super.glSurfaceView == null){
+      super.glSurfaceView = (VideoDecoderGLSurfaceView) output;
+      return;
+    }
     @Nullable Surface displaySurface = output instanceof Surface ? (Surface) output : null;
 
     if (displaySurface == null) {
@@ -816,7 +821,10 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     if (videoFrameProcessorManager.isEnabled()) {
       mediaFormat = videoFrameProcessorManager.amendMediaFormatKeys(mediaFormat);
     }
-
+    if(glSurfaceView != null){
+      return MediaCodecAdapter.Configuration.createForVideoDecoding(
+              codecInfo, mediaFormat, format, null, crypto);
+    }
     return MediaCodecAdapter.Configuration.createForVideoDecoding(
         codecInfo,
         mediaFormat,
@@ -1163,7 +1171,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
             bufferPresentationTimeUs,
             isStarted);
 
-    if (displaySurface == placeholderSurface) {
+    if (displaySurface == placeholderSurface && glSurfaceView == null) {
       // Skip frames in sync with playback, so we'll be at the right frame if the mode changes.
       if (isBufferLate(earlyUs)) {
         skipOutputBuffer(codec, bufferIndex, presentationTimeUs);
@@ -1197,6 +1205,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
 
     // Compute the buffer's desired release time in nanoseconds.
     long systemTimeNs = System.nanoTime();
+    android.util.Log.d(TAG, "processOutputBuffer:"+bufferPresentationTimeUs+" earlyUs:"+earlyUs + " systemTimeNs:"+systemTimeNs);
     long unadjustedFrameReleaseTimeNs = systemTimeNs + (earlyUs * 1000);
 
     // Apply a timestamp adjustment, if there is one.
@@ -1204,15 +1213,17 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     if (!videoFrameProcessorManager.isEnabled()) {
       earlyUs = (adjustedReleaseTimeNs - systemTimeNs) / 1000;
     } // else, use the unadjusted earlyUs in previewing use cases.
-
+    android.util.Log.d(TAG, "processOutputBuffer: earlyus:"+earlyUs);
     boolean treatDroppedBuffersAsSkipped = joiningDeadlineMs != C.TIME_UNSET;
     if (shouldDropBuffersToKeyframe(earlyUs, elapsedRealtimeUs, isLastBuffer)
         && maybeDropBuffersToKeyframe(positionUs, treatDroppedBuffersAsSkipped)) {
       return false;
     } else if (shouldDropOutputBuffer(earlyUs, elapsedRealtimeUs, isLastBuffer)) {
       if (treatDroppedBuffersAsSkipped) {
+        android.util.Log.d(TAG, "processOutputBuffer: skip:"+bufferPresentationTimeUs);
         skipOutputBuffer(codec, bufferIndex, presentationTimeUs);
       } else {
+        android.util.Log.d(TAG, "processOutputBuffer: drop "+bufferPresentationTimeUs);
         dropOutputBuffer(codec, bufferIndex, presentationTimeUs);
       }
       updateVideoFrameProcessingOffsetCounters(earlyUs);
@@ -1236,13 +1247,15 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     if (Util.SDK_INT >= 21) {
       // Let the underlying framework time the release.
       if (earlyUs < 50000) {
-        if (adjustedReleaseTimeNs == lastFrameReleaseTimeNs) {
-          // This frame should be displayed on the same vsync with the previous released frame. We
-          // are likely rendering frames at a rate higher than the screen refresh rate. Skip
-          // this buffer so that it's returned to MediaCodec sooner otherwise MediaCodec may not
-          // be able to keep decoding with this rate [b/263454203].
-          skipOutputBuffer(codec, bufferIndex, presentationTimeUs);
-        } else {
+//        if (adjustedReleaseTimeNs == lastFrameReleaseTimeNs) {
+//          // This frame should be displayed on the same vsync with the previous released frame. We
+//          // are likely rendering frames at a rate higher than the screen refresh rate. Skip
+//          // this buffer so that it's returned to MediaCodec sooner otherwise MediaCodec may not
+//          android.util.Log.d(TAG, "processOutputBuffer: skip pts:"+bufferPresentationTimeUs +" time:"+adjustedReleaseTimeNs);
+//          // be able to keep decoding with this rate [b/263454203].
+//          skipOutputBuffer(codec, bufferIndex, presentationTimeUs);
+//        } else
+        {
           notifyFrameMetadataListener(presentationTimeUs, adjustedReleaseTimeNs, format);
           renderOutputBufferV21(codec, bufferIndex, presentationTimeUs, adjustedReleaseTimeNs);
         }
@@ -1279,8 +1292,8 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
   private boolean shouldForceRender(long positionUs, long earlyUs) {
     boolean isStarted = getState() == STATE_STARTED;
     boolean shouldRenderFirstFrame =
-        !renderedFirstFrameAfterEnable
-            ? (isStarted || mayRenderFirstFrameAfterEnableIfNotStarted)
+            !renderedFirstFrameAfterEnable
+                    ? (isStarted || mayRenderFirstFrameAfterEnableIfNotStarted)
             : !renderedFirstFrameAfterReset;
     long elapsedSinceLastRenderUs = SystemClock.elapsedRealtime() * 1000 - lastRenderRealtimeUs;
     // Don't force output until we joined and the position reached the current stream.
@@ -1605,6 +1618,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     codec.releaseOutputBuffer(index, releaseTimeNs);
     TraceUtil.endSection();
     decoderCounters.renderedOutputBufferCount++;
+    decoderCounters.curRenderPts = presentationTimeUs;
     consecutiveDroppedFrameCount = 0;
     if (!videoFrameProcessorManager.isEnabled()) {
       lastRenderRealtimeUs = SystemClock.elapsedRealtime() * 1000;

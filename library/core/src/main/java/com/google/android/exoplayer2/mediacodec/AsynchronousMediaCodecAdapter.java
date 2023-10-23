@@ -16,6 +16,7 @@
 
 package com.google.android.exoplayer2.mediacodec;
 
+import static com.google.android.exoplayer2.mediacodec.SynchronousMediaCodecAdapter.deepCopyVisible;
 import static java.lang.annotation.ElementType.TYPE_USE;
 
 import android.media.MediaCodec;
@@ -25,6 +26,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.PersistableBundle;
+import android.util.Log;
 import android.view.Surface;
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
@@ -32,7 +34,9 @@ import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.decoder.CryptoInfo;
+import com.google.android.exoplayer2.decoder.VideoDecoderOutputBuffer;
 import com.google.android.exoplayer2.util.TraceUtil;
+import com.google.android.exoplayer2.video.VideoDecoderGLSurfaceView;
 import com.google.common.base.Supplier;
 import java.io.IOException;
 import java.lang.annotation.Documented;
@@ -54,6 +58,7 @@ import java.nio.ByteBuffer;
 @RequiresApi(23)
 @Deprecated
 /* package */ final class AsynchronousMediaCodecAdapter implements MediaCodecAdapter {
+  public VideoDecoderGLSurfaceView glSurfaceView;
 
   /** A factory for {@link AsynchronousMediaCodecAdapter} instances. */
   public static final class Factory implements MediaCodecAdapter.Factory {
@@ -192,7 +197,25 @@ import java.nio.ByteBuffer;
 
   @Override
   public void releaseOutputBuffer(int index, long renderTimeStampNs) {
-    codec.releaseOutputBuffer(index, renderTimeStampNs);
+    if(glSurfaceView != null){
+      VideoDecoderOutputBuffer videoOutputBuffer = new VideoDecoderOutputBuffer(this::releaseOutputBuffer);
+      videoOutputBuffer.index = index;
+      ByteBuffer buffer = codec.getOutputBuffer(index);
+      MediaFormat format = codec.getOutputFormat();
+      int width = format.getInteger(MediaFormat.KEY_WIDTH);
+      int height = format.getInteger(MediaFormat.KEY_HEIGHT);
+      int yStride = format.getInteger(MediaFormat.KEY_STRIDE);
+      videoOutputBuffer.data = deepCopyVisible(buffer);
+      videoOutputBuffer.initForYuvFrame(width, height,yStride,yStride/2,VideoDecoderOutputBuffer.COLORSPACE_BT709);
+      glSurfaceView.setOutputBuffer(videoOutputBuffer);
+    }
+    {
+      codec.releaseOutputBuffer(index, renderTimeStampNs);
+    }
+  }
+
+  private void releaseOutputBuffer(VideoDecoderOutputBuffer outputBuffer) {
+    //nothing
   }
 
   @Override
@@ -268,6 +291,12 @@ import java.nio.ByteBuffer;
   public void setOutputSurface(Surface surface) {
     maybeBlockOnQueueing();
     codec.setOutputSurface(surface);
+  }
+
+  @Override
+
+  public void setGlSurfaceView(VideoDecoderGLSurfaceView surfaceView){
+    glSurfaceView = surfaceView;
   }
 
   @Override

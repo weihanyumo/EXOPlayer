@@ -85,6 +85,7 @@ import com.google.android.exoplayer2.trackselection.TrackSelectionParameters;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectorResult;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
+import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Clock;
 import com.google.android.exoplayer2.util.ConditionVariable;
 import com.google.android.exoplayer2.util.Effect;
@@ -94,6 +95,7 @@ import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.PriorityTaskManager;
 import com.google.android.exoplayer2.util.Size;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.exoplayer2.video.PlaceholderSurface;
 import com.google.android.exoplayer2.video.VideoDecoderOutputBufferRenderer;
 import com.google.android.exoplayer2.video.VideoFrameMetadataListener;
 import com.google.android.exoplayer2.video.VideoRendererEventListener;
@@ -2939,7 +2941,7 @@ import java.util.concurrent.TimeoutException;
     @Override
     public void onRenderedFirstFrame(Object output, long renderTimeMs) {
       analyticsCollector.onRenderedFirstFrame(output, renderTimeMs);
-      if (videoOutput == output) {
+      if (videoOutput == output || (output instanceof PlaceholderSurface)) {
         listeners.sendEvent(EVENT_RENDERED_FIRST_FRAME, Listener::onRenderedFirstFrame);
       }
     }

@@ -29,8 +29,11 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.decoder.CryptoInfo;
+import com.google.android.exoplayer2.decoder.VideoDecoderOutputBuffer;
 import com.google.android.exoplayer2.util.TraceUtil;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.exoplayer2.video.VideoDecoderGLSurfaceView;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
@@ -44,7 +47,7 @@ import java.nio.ByteBuffer;
  */
 @Deprecated
 public final class SynchronousMediaCodecAdapter implements MediaCodecAdapter {
-
+  public VideoDecoderGLSurfaceView glSurfaceView;
   /** A factory for {@link SynchronousMediaCodecAdapter} instances. */
   public static class Factory implements MediaCodecAdapter.Factory {
 
@@ -164,9 +167,49 @@ public final class SynchronousMediaCodecAdapter implements MediaCodecAdapter {
   @Override
   @RequiresApi(21)
   public void releaseOutputBuffer(int index, long renderTimeStampNs) {
-    codec.releaseOutputBuffer(index, renderTimeStampNs);
+    if(glSurfaceView != null){
+      VideoDecoderOutputBuffer videoOutputBuffer = new VideoDecoderOutputBuffer(this::releaseOutputBuffer);
+      videoOutputBuffer.index = index;
+      ByteBuffer buffer = codec.getOutputBuffer(index);
+      MediaFormat format = codec.getOutputFormat();
+      int width = format.getInteger(MediaFormat.KEY_WIDTH);
+      int height = format.getInteger(MediaFormat.KEY_HEIGHT);
+      int yStride = format.getInteger(MediaFormat.KEY_STRIDE);
+      videoOutputBuffer.data = deepCopyVisible(buffer);
+      videoOutputBuffer.initForYuvFrame(width, height,yStride,yStride/2,VideoDecoderOutputBuffer.COLORSPACE_BT709);
+      glSurfaceView.setOutputBuffer(videoOutputBuffer);
+      codec.releaseOutputBuffer(index, false);
+    }else
+    {
+      MediaFormat format = codec.getOutputFormat();
+      int width = format.getInteger(MediaFormat.KEY_WIDTH);
+      int height = format.getInteger(MediaFormat.KEY_HEIGHT);
+      codec.releaseOutputBuffer(index, renderTimeStampNs);
+    }
+  }
+  static public ByteBuffer deepCopyVisible( ByteBuffer orig ) {
+    int pos = orig.position();
+    try
+    {
+      ByteBuffer toReturn;
+      // try to maintain implementation to keep performance
+      if( orig.isDirect() )
+        toReturn = ByteBuffer.allocateDirect(orig.remaining());
+      else
+        toReturn = ByteBuffer.allocate(orig.remaining());
+      toReturn.put(orig);
+      toReturn.order(orig.order());
+      return (ByteBuffer) toReturn.position(0);
+    }
+    finally
+    {
+      orig.position(pos);
+    }
   }
 
+  public void releaseOutputBuffer(VideoDecoderOutputBuffer outputBuffer){
+    //codec.releaseOutputBuffer(outputBuffer.index, false);
+  }
   @Override
   public void flush() {
     codec.flush();
@@ -192,9 +235,16 @@ public final class SynchronousMediaCodecAdapter implements MediaCodecAdapter {
   @Override
   @RequiresApi(23)
   public void setOutputSurface(Surface surface) {
+    if(glSurfaceView != null){
+      return;
+    }
     codec.setOutputSurface(surface);
   }
 
+
+  public void setGlSurfaceView(VideoDecoderGLSurfaceView surfaceView){
+    glSurfaceView = surfaceView;
+  }
   @Override
   @RequiresApi(19)
   public void setParameters(Bundle params) {

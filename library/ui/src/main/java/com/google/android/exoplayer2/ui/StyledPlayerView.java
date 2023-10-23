@@ -256,7 +256,7 @@ public class StyledPlayerView extends FrameLayout implements AdViewProvider {
   private final ComponentListener componentListener;
   @Nullable private final AspectRatioFrameLayout contentFrame;
   @Nullable private final View shutterView;
-  @Nullable private final View surfaceView;
+  @Nullable private View surfaceView;
   private final boolean surfaceViewIgnoresVideoAspectRatio;
   @Nullable private final ImageView artworkView;
   @Nullable private final SubtitleView subtitleView;
@@ -537,6 +537,23 @@ public class StyledPlayerView extends FrameLayout implements AdViewProvider {
     }
   }
 
+public void setView(View view){
+  ViewGroup.LayoutParams params = null;
+  if(surfaceView != null){
+    params = surfaceView.getLayoutParams();
+    if(contentFrame != null){
+      contentFrame.removeView(surfaceView);
+    }
+  }
+  surfaceView = view;
+  if(params !=null) {
+    surfaceView.setLayoutParams(params);
+  }
+
+  surfaceView.setOnClickListener(componentListener);
+  surfaceView.setClickable(false);
+  contentFrame.addView(surfaceView, 0);
+}
   /** Returns the player currently set on this view, or null if no player is set. */
   @Nullable
   public Player getPlayer() {

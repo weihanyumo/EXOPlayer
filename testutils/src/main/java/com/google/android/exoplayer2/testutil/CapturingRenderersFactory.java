@@ -43,6 +43,7 @@ import com.google.android.exoplayer2.metadata.MetadataRenderer;
 import com.google.android.exoplayer2.text.TextOutput;
 import com.google.android.exoplayer2.text.TextRenderer;
 import com.google.android.exoplayer2.video.MediaCodecVideoRenderer;
+import com.google.android.exoplayer2.video.VideoDecoderGLSurfaceView;
 import com.google.android.exoplayer2.video.VideoRendererEventListener;
 import com.google.common.collect.ImmutableList;
 import java.io.IOException;
@@ -251,6 +252,11 @@ public class CapturingRenderersFactory implements RenderersFactory, Dumper.Dumpa
     @Override
     public void setOutputSurface(Surface surface) {
       delegate.setOutputSurface(surface);
+    }
+
+    @Override
+    public void setGlSurfaceView(VideoDecoderGLSurfaceView surfaceView) {
+
     }
 
     @RequiresApi(19)

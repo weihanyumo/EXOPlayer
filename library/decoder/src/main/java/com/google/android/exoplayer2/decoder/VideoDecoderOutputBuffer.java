@@ -31,6 +31,7 @@ import java.nio.ByteBuffer;
 @Deprecated
 public class VideoDecoderOutputBuffer extends DecoderOutputBuffer {
 
+  public int index;
   public static final int COLORSPACE_UNKNOWN = 0;
   public static final int COLORSPACE_BT601 = 1;
   public static final int COLORSPACE_BT709 = 2;
@@ -150,6 +151,17 @@ public class VideoDecoderOutputBuffer extends DecoderOutputBuffer {
     data.position(yLength + uvLength);
     yuvPlanes[2] = data.slice();
     yuvPlanes[2].limit(uvLength);
+
+    data.position(yLength);
+    ByteBuffer uvData = data.slice();
+    uvData.limit(uvLength*2);
+    yuvPlanes[1]= ByteBuffer.allocateDirect(uvLength);
+    yuvPlanes[2]= ByteBuffer.allocateDirect(uvLength);
+    for (int index = 0; index < uvLength; index++) {
+      yuvPlanes[1].put(index, uvData.get(index*2));
+      yuvPlanes[2].put(index, uvData.get(index*2+1));
+    }
+
     if (yuvStrides == null) {
       yuvStrides = new int[3];
     }

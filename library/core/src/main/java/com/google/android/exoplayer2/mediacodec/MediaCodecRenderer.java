@@ -76,6 +76,8 @@ import com.google.android.exoplayer2.util.NalUnitUtil;
 import com.google.android.exoplayer2.util.TimedValueQueue;
 import com.google.android.exoplayer2.util.TraceUtil;
 import com.google.android.exoplayer2.util.Util;
+import com.google.android.exoplayer2.video.VideoDecoderGLSurfaceView;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -379,6 +381,8 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
   private OutputStreamInfo outputStreamInfo;
   private long lastProcessedOutputBufferTimeUs;
   private boolean needToNotifyOutputFormatChangeAfterStreamChange;
+
+  public VideoDecoderGLSurfaceView glSurfaceView;
 
   /**
    * @param trackType The {@link C.TrackType track type} that the renderer handles.
@@ -819,8 +823,10 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
       } else if (codec != null) {
         long renderStartTimeMs = SystemClock.elapsedRealtime();
         TraceUtil.beginSection("drainAndFeed");
+        android.util.Log.d(TAG, "render: drainOutputBuffer begin");
         while (drainOutputBuffer(positionUs, elapsedRealtimeUs)
             && shouldContinueRendering(renderStartTimeMs)) {}
+        android.util.Log.d(TAG, "render: drainOutputBuffer end");
         while (feedInputBuffer() && shouldContinueRendering(renderStartTimeMs)) {}
         TraceUtil.endSection();
       } else {
@@ -1138,6 +1144,7 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
     try {
       TraceUtil.beginSection("createCodec:" + codecName);
       codec = codecAdapterFactory.createAdapter(configuration);
+      codec.setGlSurfaceView(glSurfaceView);
     } finally {
       TraceUtil.endSection();
     }

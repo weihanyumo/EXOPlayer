@@ -48,6 +48,7 @@ public final class DecoderCounters {
   public int skippedInputBufferCount;
   /** The number of rendered output buffers. */
   public int renderedOutputBufferCount;
+  public long curRenderPts;
   /**
    * The number of skipped output buffers.
    *
