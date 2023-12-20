@@ -20,6 +20,8 @@ import static java.lang.annotation.ElementType.TYPE_USE;
 import android.annotation.TargetApi;
 import android.media.AudioTimestamp;
 import android.media.AudioTrack;
+import android.util.Log;
+
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -131,6 +133,7 @@ import java.lang.annotation.Target;
     if (audioTimestamp == null || (systemTimeUs - lastTimestampSampleTimeUs) < sampleIntervalUs) {
       return false;
     }
+    Log.d("audioposition", "maybePollTimestamp: "+ systemTimeUs + " lastTimestampSampleTimeUs: "+ lastTimestampSampleTimeUs +" sampleIntervalUs: "+sampleIntervalUs);
     lastTimestampSampleTimeUs = systemTimeUs;
     boolean updatedTimestamp = audioTimestamp.maybeUpdateTimestamp();
     switch (state) {
@@ -269,6 +272,7 @@ import java.lang.annotation.Target;
       default:
         throw new IllegalStateException();
     }
+    Log.d("audiotimestamppoller", "updateState: "+state + " intervalus: "+ sampleIntervalUs);
   }
 
   @RequiresApi(19)

@@ -387,6 +387,21 @@ public class EventLogger implements AnalyticsListener {
   }
 
   @Override
+  public void onPlayerStateChanged(EventTime eventTime, boolean playWhenReady, int playbackState) {
+    logd(eventTime, "playbackStateChanged: "+playbackState);
+  }
+
+  @Override
+  public void onAudioCodecError(EventTime eventTime, Exception audioCodecError) {
+    logd(eventTime, "audioDecodeError: "+audioCodecError);
+  }
+
+  @Override
+  public void onAudioSinkError(EventTime eventTime, Exception audioSinkError) {
+    logd(eventTime, "audiosinkerror: "+audioSinkError);
+  }
+
+  @Override
   public void onVideoDecoderInitialized(
       EventTime eventTime, String decoderName, long initializationDurationMs) {
     logd(eventTime, "videoDecoderInitialized", decoderName);

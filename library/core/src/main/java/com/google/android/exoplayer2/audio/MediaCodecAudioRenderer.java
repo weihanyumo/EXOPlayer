@@ -641,6 +641,7 @@ public class MediaCodecAudioRenderer extends MediaCodecRenderer implements Media
 
   @Override
   public long getPositionUs() {
+    android.util.Log.d(TAG, "getPositionUs: "+getState());
     if (getState() == STATE_STARTED) {
       updateCurrentPosition();
     }

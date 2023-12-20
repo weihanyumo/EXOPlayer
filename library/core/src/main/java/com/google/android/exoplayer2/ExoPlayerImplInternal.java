@@ -959,6 +959,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
       rendererPositionUs =
           mediaClock.syncAndGetPositionUs(
               /* isReadingAhead= */ playingPeriodHolder != queue.getReadingPeriod());
+      android.util.Log.d(TAG, "logtest  updatePlaybackPositions: renderPositionUs: "+rendererPositionUs);
       long periodPositionUs = playingPeriodHolder.toPeriodTime(rendererPositionUs);
       maybeTriggerPendingMessages(playbackInfo.positionUs, periodPositionUs);
       playbackInfo.updatePositionUs(periodPositionUs);
@@ -1032,6 +1033,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
     boolean renderersEnded = true;
     boolean renderersAllowPlayback = true;
+    android.util.Log.d(TAG, "logtest  doSomeWork: positionUs: "+rendererPositionUs);
     if (playingPeriodHolder.prepared) {
       long rendererPositionElapsedRealtimeUs = SystemClock.elapsedRealtime() * 1000;
       playingPeriodHolder.mediaPeriod.discardBuffer(

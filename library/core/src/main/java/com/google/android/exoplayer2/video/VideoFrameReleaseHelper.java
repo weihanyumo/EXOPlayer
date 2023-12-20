@@ -423,7 +423,7 @@ public final class VideoFrameReleaseHelper {
     if(snappedAfterDiff < snappedBeforeDiff){
       use = "useAfter";
     }
-    android.util.Log.d(TAG, "closestVsync releaseTime:"+releaseTime+" snappedBeforeNs"+snappedBeforeNs+" snappedAfterNs:"+snappedAfterNs+" "+ use);
+    android.util.Log.d(TAG, "closestVsync sampledVsyncTime: "+sampledVsyncTime+ " releaseTime: "+releaseTime+" snappedBeforeNs: "+snappedBeforeNs+" snappedAfterNs: "+snappedAfterNs+" "+ use);
     return snappedAfterDiff < snappedBeforeDiff ? snappedAfterNs : snappedBeforeNs;
   }
 

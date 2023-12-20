@@ -18,6 +18,8 @@ package com.google.android.exoplayer2;
 import static com.google.android.exoplayer2.util.Assertions.checkNotNull;
 import static java.lang.Math.max;
 
+import android.util.Log;
+
 import androidx.annotation.GuardedBy;
 import androidx.annotation.Nullable;
 import com.google.android.exoplayer2.analytics.PlayerId;
@@ -57,6 +59,7 @@ public abstract class BaseRenderer implements Renderer, RendererCapabilities {
   private long readingPositionUs;
   private boolean streamIsFinal;
   private boolean throwRendererExceptionIsExecuting;
+  private static final String TAG = "BaseRenderer";
 
   @GuardedBy("lock")
   @Nullable
@@ -114,6 +117,7 @@ public abstract class BaseRenderer implements Renderer, RendererCapabilities {
     Assertions.checkState(state == STATE_DISABLED);
     this.configuration = configuration;
     state = STATE_ENABLED;
+    Log.d(TAG, "enable: "+this);
     onEnabled(joining, mayRenderStartOfStream);
     replaceStream(formats, stream, startPositionUs, offsetUs);
     resetPosition(positionUs, joining);
@@ -122,6 +126,7 @@ public abstract class BaseRenderer implements Renderer, RendererCapabilities {
   @Override
   public final void start() throws ExoPlaybackException {
     Assertions.checkState(state == STATE_ENABLED);
+    Log.d(TAG, "start: "+this);
     state = STATE_STARTED;
     onStarted();
   }
@@ -187,6 +192,7 @@ public abstract class BaseRenderer implements Renderer, RendererCapabilities {
   public final void stop() {
     Assertions.checkState(state == STATE_STARTED);
     state = STATE_ENABLED;
+    Log.d(TAG, "stop: "+this);
     onStopped();
   }
 
@@ -195,6 +201,7 @@ public abstract class BaseRenderer implements Renderer, RendererCapabilities {
     Assertions.checkState(state == STATE_ENABLED);
     formatHolder.clear();
     state = STATE_DISABLED;
+    Log.d(TAG, "disable: "+this);
     stream = null;
     streamFormats = null;
     streamIsFinal = false;

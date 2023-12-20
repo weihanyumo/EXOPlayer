@@ -823,10 +823,8 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
       } else if (codec != null) {
         long renderStartTimeMs = SystemClock.elapsedRealtime();
         TraceUtil.beginSection("drainAndFeed");
-        android.util.Log.d(TAG, "render: drainOutputBuffer begin");
         while (drainOutputBuffer(positionUs, elapsedRealtimeUs)
             && shouldContinueRendering(renderStartTimeMs)) {}
-        android.util.Log.d(TAG, "render: drainOutputBuffer end");
         while (feedInputBuffer() && shouldContinueRendering(renderStartTimeMs)) {}
         TraceUtil.endSection();
       } else {
@@ -1404,6 +1402,7 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
     }
 
     onQueueInputBuffer(buffer);
+    android.util.Log.d(TAG, "feedInputBuffer pts"+presentationTimeUs);
     try {
       if (bufferEncrypted) {
         codec.queueSecureInputBuffer(

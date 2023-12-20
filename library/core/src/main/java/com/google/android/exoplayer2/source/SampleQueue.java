@@ -614,7 +614,6 @@ public class SampleQueue implements TrackOutput {
     if (upstreamFormatAdjustmentRequired) {
       format(Assertions.checkStateNotNull(unadjustedUpstreamFormat));
     }
-
     boolean isKeyframe = (flags & C.BUFFER_FLAG_KEY_FRAME) != 0;
     if (upstreamKeyframeRequired) {
       if (!isKeyframe) {
@@ -820,7 +819,14 @@ public class SampleQueue implements TrackOutput {
     flags[relativeEndIndex] = sampleFlags;
     cryptoDatas[relativeEndIndex] = cryptoData;
     sourceIds[relativeEndIndex] = upstreamSourceId;
-
+    String streamType = "notype";
+    if (upstreamFormat != null && upstreamFormat.sampleMimeType != null) {
+      streamType = upstreamFormat.sampleMimeType;
+    }
+    else if(upstreamFormat != null && upstreamFormat.codecs != null){
+      streamType = upstreamFormat.codecs;
+    }
+    android.util.Log.d(TAG, streamType + ": commitSample timeUs: "+timeUs);
     if (sharedSampleMetadata.isEmpty()
         || !sharedSampleMetadata.getEndValue().format.equals(upstreamFormat)) {
       DrmSessionReference drmSessionReference =

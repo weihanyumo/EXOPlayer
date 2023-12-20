@@ -15,6 +15,8 @@
  */
 package com.google.android.exoplayer2;
 
+import android.util.Log;
+
 import androidx.annotation.Nullable;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Clock;
@@ -53,6 +55,8 @@ import com.google.android.exoplayer2.util.StandaloneMediaClock;
   private boolean isUsingStandaloneClock;
   private boolean standaloneClockIsStarted;
 
+  static  String TAG = "DefaultMediaClock";
+
   /**
    * Creates a new instance with a listener for playback parameters changes and a {@link Clock} to
    * use for the standalone clock implementation.
@@ -64,6 +68,7 @@ import com.google.android.exoplayer2.util.StandaloneMediaClock;
     this.listener = listener;
     this.standaloneClock = new StandaloneMediaClock(clock);
     isUsingStandaloneClock = true;
+    Log.d(TAG, "DefaultMediaClock: ");
   }
 
   /** Starts the standalone fallback clock. */
@@ -119,6 +124,7 @@ import com.google.android.exoplayer2.util.StandaloneMediaClock;
       this.rendererClock = null;
       this.rendererClockSource = null;
       isUsingStandaloneClock = true;
+      Log.d(TAG, "onRendererDisabled: ");
     }
   }
 
@@ -136,6 +142,7 @@ import com.google.android.exoplayer2.util.StandaloneMediaClock;
 
   @Override
   public long getPositionUs() {
+    Log.d(TAG, "getPositionUs: "+isUsingStandaloneClock);
     return isUsingStandaloneClock
         ? standaloneClock.getPositionUs()
         : Assertions.checkNotNull(rendererClock).getPositionUs();
@@ -160,6 +167,7 @@ import com.google.android.exoplayer2.util.StandaloneMediaClock;
   private void syncClocks(boolean isReadingAhead) {
     if (shouldUseStandaloneClock(isReadingAhead)) {
       isUsingStandaloneClock = true;
+      Log.d(TAG, "syncClocks: ");
       if (standaloneClockIsStarted) {
         standaloneClock.start();
       }

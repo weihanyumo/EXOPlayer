@@ -26,6 +26,8 @@ import static java.lang.annotation.ElementType.TYPE_USE;
 import android.media.AudioTimestamp;
 import android.media.AudioTrack;
 import android.os.SystemClock;
+import android.util.Log;
+
 import androidx.annotation.IntDef;
 import androidx.annotation.Nullable;
 import com.google.android.exoplayer2.C;
@@ -204,7 +206,7 @@ import java.lang.reflect.Method;
   // Results from the last call to getCurrentPositionUs that used a different sample mode.
   private long previousModePositionUs;
   private long previousModeSystemTimeUs;
-
+  private static final String TAG = "audioposition";
   /**
    * Creates a new audio track position tracker.
    *
@@ -290,6 +292,7 @@ import java.lang.reflect.Method;
       elapsedSinceTimestampUs =
           Util.getMediaDurationForPlayoutDuration(elapsedSinceTimestampUs, audioTrackPlaybackSpeed);
       positionUs = timestampPositionUs + elapsedSinceTimestampUs;
+      Log.d(TAG, "useGetTimestampMode posFrames: "+timestampPositionFrames+" posUs: "+timestampPositionUs+" elapsedTimeUs: "+elapsedSinceTimestampUs + " positionUs: "+positionUs);
     } else {
       if (playheadOffsetCount == 0) {
         // The AudioTrack has started, but we don't have any samples to compute a smoothed position.
@@ -305,10 +308,12 @@ import java.lang.reflect.Method;
       if (!sourceEnded) {
         positionUs = max(0, positionUs - latencyUs);
       }
+      Log.d(TAG, "useGetTimestampMode no positionUs: "+positionUs);
     }
 
     if (lastSampleUsedGetTimestampMode != useGetTimestampMode) {
       // We've switched sampling mode.
+      Log.d(TAG, "mode changed");
       previousModeSystemTimeUs = lastSystemTimeUs;
       previousModePositionUs = lastPositionUs;
     }
@@ -316,12 +321,14 @@ import java.lang.reflect.Method;
     if (elapsedSincePreviousModeUs < MODE_SWITCH_SMOOTHING_DURATION_US) {
       // Use a ramp to smooth between the old mode and the new one to avoid introducing a sudden
       // jump if the two modes disagree.
+
       long previousModeProjectedPositionUs =
           previousModePositionUs
               + Util.getMediaDurationForPlayoutDuration(
                   elapsedSincePreviousModeUs, audioTrackPlaybackSpeed);
       // A ramp consisting of 1000 points distributed over MODE_SWITCH_SMOOTHING_DURATION_US.
       long rampPoint = (elapsedSincePreviousModeUs * 1000) / MODE_SWITCH_SMOOTHING_DURATION_US;
+      Log.d(TAG, "elapsedSincePreviousModeUs: "+elapsedSincePreviousModeUs+" ramppoint: "+rampPoint );
       positionUs *= rampPoint;
       positionUs += (1000 - rampPoint) * previousModeProjectedPositionUs;
       positionUs /= 1000;
@@ -342,6 +349,7 @@ import java.lang.reflect.Method;
     lastPositionUs = positionUs;
     lastSampleUsedGetTimestampMode = useGetTimestampMode;
 
+    Log.d(TAG, "returnt positonUs: "+ positionUs);
     return positionUs;
   }
 

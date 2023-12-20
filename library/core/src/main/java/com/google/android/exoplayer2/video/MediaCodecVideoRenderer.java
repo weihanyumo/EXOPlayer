@@ -175,6 +175,8 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
   private int buffersInCodecCount;
   private long lastBufferPresentationTimeUs;
   private long lastRenderRealtimeUs;
+
+  private long lastPositionUsForRender;
   private long totalVideoFrameProcessingOffsetUs;
   private int videoFrameProcessingOffsetCount;
   private long lastFrameReleaseTimeNs;
@@ -559,6 +561,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
   @Override
   protected void onPositionReset(long positionUs, boolean joining) throws ExoPlaybackException {
     super.onPositionReset(positionUs, joining);
+    android.util.Log.d(TAG, "onPositionReset: "+positionUs);
     if (videoFrameProcessorManager.isEnabled()) {
       videoFrameProcessorManager.flush();
     }
@@ -585,6 +588,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
 
   @Override
   public boolean isReady() {
+    android.util.Log.d(TAG, "logtest superreday: "+super.isReady()+" ProcessorManager: "+(!videoFrameProcessorManager.isEnabled() || videoFrameProcessorManager.isReady())+" first:"+renderedFirstFrameAfterReset + " surface: "+(placeholderSurface != null && displaySurface == placeholderSurface));
     if (super.isReady()
         && (!videoFrameProcessorManager.isEnabled() || videoFrameProcessorManager.isReady())
         && (renderedFirstFrameAfterReset
@@ -1140,7 +1144,6 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
       Format format)
       throws ExoPlaybackException {
     checkNotNull(codec); // Can not render video without codec
-
     if (initialPositionUs == C.TIME_UNSET) {
       initialPositionUs = positionUs;
     }
@@ -1171,6 +1174,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
             bufferPresentationTimeUs,
             isStarted);
 
+    android.util.Log.d(TAG, "logtest processOutputBuffer posUs: "+positionUs + " ptsUs: "+bufferPresentationTimeUs + " earlyUs: "+earlyUs+ " state: "+getState());
     if (displaySurface == placeholderSurface && glSurfaceView == null) {
       // Skip frames in sync with playback, so we'll be at the right frame if the mode changes.
       if (isBufferLate(earlyUs)) {
@@ -1200,12 +1204,12 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     }
 
     if (!isStarted || positionUs == initialPositionUs) {
+      android.util.Log.d(TAG, "processOutputBuffer but not started: "+isStarted+ " "+initialPositionUs);
       return false;
     }
 
     // Compute the buffer's desired release time in nanoseconds.
     long systemTimeNs = System.nanoTime();
-    android.util.Log.d(TAG, "processOutputBuffer:"+bufferPresentationTimeUs+" earlyUs:"+earlyUs + " systemTimeNs:"+systemTimeNs);
     long unadjustedFrameReleaseTimeNs = systemTimeNs + (earlyUs * 1000);
 
     // Apply a timestamp adjustment, if there is one.
@@ -1213,7 +1217,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     if (!videoFrameProcessorManager.isEnabled()) {
       earlyUs = (adjustedReleaseTimeNs - systemTimeNs) / 1000;
     } // else, use the unadjusted earlyUs in previewing use cases.
-    android.util.Log.d(TAG, "processOutputBuffer: earlyus:"+earlyUs);
+    android.util.Log.d(TAG, "logtest  processOutputBuffer: earlyus:"+earlyUs);
     boolean treatDroppedBuffersAsSkipped = joiningDeadlineMs != C.TIME_UNSET;
     if (shouldDropBuffersToKeyframe(earlyUs, elapsedRealtimeUs, isLastBuffer)
         && maybeDropBuffersToKeyframe(positionUs, treatDroppedBuffersAsSkipped)) {
@@ -1246,7 +1250,8 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
 
     if (Util.SDK_INT >= 21) {
       // Let the underlying framework time the release.
-      if (earlyUs < 50000) {
+      boolean foreceRender = systemTimeNs/1000 > lastRenderRealtimeUs+1000000 && positionUs == lastRenderRealtimeUs;
+      if (earlyUs < 50000 || foreceRender) {
 //        if (adjustedReleaseTimeNs == lastFrameReleaseTimeNs) {
 //          // This frame should be displayed on the same vsync with the previous released frame. We
 //          // are likely rendering frames at a rate higher than the screen refresh rate. Skip
@@ -1261,10 +1266,12 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
         }
         updateVideoFrameProcessingOffsetCounters(earlyUs);
         lastFrameReleaseTimeNs = adjustedReleaseTimeNs;
+        lastPositionUsForRender = positionUs;
         return true;
       }
     } else {
       // We need to time the release ourselves.
+
       if (earlyUs < 30000) {
         if (earlyUs > 11000) {
           // We're a little too early to render the frame. Sleep until the frame can be rendered.
@@ -1668,6 +1675,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
   /* package */ void maybeNotifyRenderedFirstFrame() {
     renderedFirstFrameAfterEnable = true;
     if (!renderedFirstFrameAfterReset) {
+      android.util.Log.d(TAG, "logtest  maybeNotifyRenderedFirstFrame: ");
       renderedFirstFrameAfterReset = true;
       eventDispatcher.renderedFirstFrame(displaySurface);
       haveReportedFirstFrameRenderedForCurrentSurface = true;
