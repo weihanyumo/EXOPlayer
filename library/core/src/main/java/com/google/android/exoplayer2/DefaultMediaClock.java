@@ -68,7 +68,6 @@ import com.google.android.exoplayer2.util.StandaloneMediaClock;
     this.listener = listener;
     this.standaloneClock = new StandaloneMediaClock(clock);
     isUsingStandaloneClock = true;
-    Log.d(TAG, "DefaultMediaClock: ");
   }
 
   /** Starts the standalone fallback clock. */
@@ -142,7 +141,6 @@ import com.google.android.exoplayer2.util.StandaloneMediaClock;
 
   @Override
   public long getPositionUs() {
-    Log.d(TAG, "getPositionUs: "+isUsingStandaloneClock);
     return isUsingStandaloneClock
         ? standaloneClock.getPositionUs()
         : Assertions.checkNotNull(rendererClock).getPositionUs();
@@ -167,7 +165,6 @@ import com.google.android.exoplayer2.util.StandaloneMediaClock;
   private void syncClocks(boolean isReadingAhead) {
     if (shouldUseStandaloneClock(isReadingAhead)) {
       isUsingStandaloneClock = true;
-      Log.d(TAG, "syncClocks: ");
       if (standaloneClockIsStarted) {
         standaloneClock.start();
       }

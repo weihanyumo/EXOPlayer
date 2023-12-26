@@ -475,6 +475,7 @@ public interface ExoPlayer extends Player {
     /* package */ boolean skipSilenceEnabled;
     /* package */ boolean deviceVolumeControlEnabled;
     @C.VideoScalingMode /* package */ int videoScalingMode;
+    boolean ionlyEnabled;
     @C.VideoChangeFrameRateStrategy /* package */ int videoChangeFrameRateStrategy;
     /* package */ boolean useLazyPreparation;
     /* package */ SeekParameters seekParameters;
@@ -928,6 +929,12 @@ public interface ExoPlayer extends Player {
     public Builder setVideoScalingMode(@C.VideoScalingMode int videoScalingMode) {
       checkState(!buildCalled);
       this.videoScalingMode = videoScalingMode;
+      return this;
+    }
+
+    public Builder setIonlyEnable(boolean ionlyEnable){
+      checkState(!buildCalled);
+      this.ionlyEnabled = ionlyEnable;
       return this;
     }
 

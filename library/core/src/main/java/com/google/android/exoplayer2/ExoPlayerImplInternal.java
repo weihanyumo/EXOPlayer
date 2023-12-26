@@ -1033,7 +1033,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
     boolean renderersEnded = true;
     boolean renderersAllowPlayback = true;
-    android.util.Log.d(TAG, "logtest  doSomeWork: positionUs: "+rendererPositionUs);
+//    android.util.Log.d(TAG, "logtest  doSomeWork: positionUs: "+rendererPositionUs);
     if (playingPeriodHolder.prepared) {
       long rendererPositionElapsedRealtimeUs = SystemClock.elapsedRealtime() * 1000;
       playingPeriodHolder.mediaPeriod.discardBuffer(

@@ -383,7 +383,7 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
   private boolean needToNotifyOutputFormatChangeAfterStreamChange;
 
   public VideoDecoderGLSurfaceView glSurfaceView;
-
+  public boolean ionlyEnabled;
   /**
    * @param trackType The {@link C.TrackType track type} that the renderer handles.
    * @param codecAdapterFactory A factory for {@link MediaCodecAdapter} instances.
@@ -1296,6 +1296,15 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
     if (result == C.RESULT_NOTHING_READ) {
       return false;
     }
+    if( ionlyEnabled && inputFormat.sampleMimeType.contains("video")) {
+      if (buffer.isKeyFrame()) {
+        android.util.Log.d(TAG, "feedInputBuffer: key frame pts: " + (buffer.timeUs));
+      } else {
+        android.util.Log.d(TAG, "feedInputBuffer: key frame not pts:" + buffer.timeUs);
+        buffer.clear();
+        return true;
+      }
+    }
     if (result == C.RESULT_FORMAT_READ) {
       if (codecReconfigurationState == RECONFIGURATION_STATE_QUEUE_PENDING) {
         // We received two formats in a row. Clear the current buffer of any reconfiguration data
@@ -1402,7 +1411,6 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
     }
 
     onQueueInputBuffer(buffer);
-    android.util.Log.d(TAG, "feedInputBuffer pts"+presentationTimeUs);
     try {
       if (bufferEncrypted) {
         codec.queueSecureInputBuffer(

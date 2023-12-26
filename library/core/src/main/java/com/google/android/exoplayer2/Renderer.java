@@ -231,6 +231,8 @@ public interface Renderer extends PlayerMessage.Target {
    * Applications or extensions may define custom {@code MSG_*} constants that can be passed to
    * renderers. These custom constants must be greater than or equal to this value.
    */
+
+  int MSG_SET_VIDEO_IONLY_ENABLE = 15;
   int MSG_CUSTOM_BASE = 10000;
 
   /**

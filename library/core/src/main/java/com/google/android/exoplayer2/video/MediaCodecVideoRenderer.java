@@ -180,7 +180,6 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
   private long totalVideoFrameProcessingOffsetUs;
   private int videoFrameProcessingOffsetCount;
   private long lastFrameReleaseTimeNs;
-
   private VideoSize decodedVideoSize;
   @Nullable private VideoSize reportedVideoSize;
 
@@ -702,6 +701,8 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
           videoFrameProcessorManager.setOutputSurfaceInfo(displaySurface, outputResolution);
         }
         break;
+      case MSG_SET_VIDEO_IONLY_ENABLE:
+        super.ionlyEnabled = (boolean)message;
       case MSG_SET_AUDIO_ATTRIBUTES:
       case MSG_SET_AUX_EFFECT_INFO:
       case MSG_SET_CAMERA_MOTION_LISTENER:
@@ -1174,7 +1175,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
             bufferPresentationTimeUs,
             isStarted);
 
-    android.util.Log.d(TAG, "logtest processOutputBuffer posUs: "+positionUs + " ptsUs: "+bufferPresentationTimeUs + " earlyUs: "+earlyUs+ " state: "+getState());
+//    android.util.Log.d(TAG, "logtest processOutputBuffer posUs: "+positionUs + " ptsUs: "+bufferPresentationTimeUs + " earlyUs: "+earlyUs+ " state: "+getState());
     if (displaySurface == placeholderSurface && glSurfaceView == null) {
       // Skip frames in sync with playback, so we'll be at the right frame if the mode changes.
       if (isBufferLate(earlyUs)) {
@@ -1252,14 +1253,14 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
       // Let the underlying framework time the release.
       boolean foreceRender = systemTimeNs/1000 > lastRenderRealtimeUs+1000000 && positionUs == lastRenderRealtimeUs;
       if (earlyUs < 50000 || foreceRender) {
-//        if (adjustedReleaseTimeNs == lastFrameReleaseTimeNs) {
-//          // This frame should be displayed on the same vsync with the previous released frame. We
-//          // are likely rendering frames at a rate higher than the screen refresh rate. Skip
-//          // this buffer so that it's returned to MediaCodec sooner otherwise MediaCodec may not
+        if (adjustedReleaseTimeNs == lastFrameReleaseTimeNs) {
+          // This frame should be displayed on the same vsync with the previous released frame. We
+          // are likely rendering frames at a rate higher than the screen refresh rate. Skip
+          // this buffer so that it's returned to MediaCodec sooner otherwise MediaCodec may not
 //          android.util.Log.d(TAG, "processOutputBuffer: skip pts:"+bufferPresentationTimeUs +" time:"+adjustedReleaseTimeNs);
-//          // be able to keep decoding with this rate [b/263454203].
-//          skipOutputBuffer(codec, bufferIndex, presentationTimeUs);
-//        } else
+          // be able to keep decoding with this rate [b/263454203].
+          skipOutputBuffer(codec, bufferIndex, presentationTimeUs);
+        } else
         {
           notifyFrameMetadataListener(presentationTimeUs, adjustedReleaseTimeNs, format);
           renderOutputBufferV21(codec, bufferIndex, presentationTimeUs, adjustedReleaseTimeNs);
@@ -1814,6 +1815,10 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     if (tunnelingAudioSessionId != C.AUDIO_SESSION_ID_UNSET) {
       configureTunnelingV21(mediaFormat, tunnelingAudioSessionId);
     }
+    if(super.ionlyEnabled){
+      mediaFormat.setInteger("vendor.video-trickmode.enable", 1);
+    }
+
     return mediaFormat;
   }
 

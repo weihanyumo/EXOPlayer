@@ -281,7 +281,7 @@ public final class VideoFrameReleaseHelper {
     long snappedTimeNs = closestVsync(adjustedReleaseTimeNs, sampledVsyncTimeNs, vsyncDurationNs);
     // Apply an offset so that we release before the target vsync, but after the previous one.
     long ret = snappedTimeNs - vsyncOffsetNs;
-    android.util.Log.d(TAG, "adjustReleaseTime: "+releaseTimeNs + " lastAdjustedReleaseTimeNs："+lastAdjustedReleaseTimeNs+ " adjustedReleaseTimeNs:"+adjustedReleaseTimeNs+" snappedTimeNs"+snappedTimeNs+ " ret:"+ret);
+//    android.util.Log.d(TAG, "adjustReleaseTime: "+releaseTimeNs + " lastAdjustedReleaseTimeNs："+lastAdjustedReleaseTimeNs+ " adjustedReleaseTimeNs:"+adjustedReleaseTimeNs+" snappedTimeNs"+snappedTimeNs+ " ret:"+ret);
     return ret;
   }
 
@@ -408,11 +408,11 @@ public final class VideoFrameReleaseHelper {
     long snappedBeforeNs;
     long snappedAfterNs;
     if (releaseTime <= snappedTimeNs) {
-      android.util.Log.d(TAG, "closestVsync: release < snappedTime");
+//      android.util.Log.d(TAG, "closestVsync: release < snappedTime");
       snappedBeforeNs = snappedTimeNs - vsyncDuration;
       snappedAfterNs = snappedTimeNs;
     } else {
-      android.util.Log.d(TAG, "closestVsync: release > snappedTime");
+//      android.util.Log.d(TAG, "closestVsync: release > snappedTime");
       snappedBeforeNs = snappedTimeNs;
       snappedAfterNs = snappedTimeNs + vsyncDuration;
     }
@@ -423,7 +423,7 @@ public final class VideoFrameReleaseHelper {
     if(snappedAfterDiff < snappedBeforeDiff){
       use = "useAfter";
     }
-    android.util.Log.d(TAG, "closestVsync sampledVsyncTime: "+sampledVsyncTime+ " releaseTime: "+releaseTime+" snappedBeforeNs: "+snappedBeforeNs+" snappedAfterNs: "+snappedAfterNs+" "+ use);
+//    android.util.Log.d(TAG, "closestVsync sampledVsyncTime: "+sampledVsyncTime+ " releaseTime: "+releaseTime+" snappedBeforeNs: "+snappedBeforeNs+" snappedAfterNs: "+snappedAfterNs+" "+ use);
     return snappedAfterDiff < snappedBeforeDiff ? snappedAfterNs : snappedBeforeNs;
   }
 
