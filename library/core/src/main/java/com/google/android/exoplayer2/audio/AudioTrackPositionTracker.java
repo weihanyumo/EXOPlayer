@@ -292,7 +292,7 @@ import java.lang.reflect.Method;
       elapsedSinceTimestampUs =
           Util.getMediaDurationForPlayoutDuration(elapsedSinceTimestampUs, audioTrackPlaybackSpeed);
       positionUs = timestampPositionUs + elapsedSinceTimestampUs;
-      Log.d(TAG, "useGetTimestampMode posFrames: "+timestampPositionFrames+" posUs: "+timestampPositionUs+" elapsedTimeUs: "+elapsedSinceTimestampUs + " positionUs: "+positionUs);
+//      Log.d(TAG, "useGetTimestampMode posFrames: "+timestampPositionFrames+" posUs: "+timestampPositionUs+" elapsedTimeUs: "+elapsedSinceTimestampUs + " positionUs: "+positionUs);
     } else {
       if (playheadOffsetCount == 0) {
         // The AudioTrack has started, but we don't have any samples to compute a smoothed position.
@@ -308,7 +308,7 @@ import java.lang.reflect.Method;
       if (!sourceEnded) {
         positionUs = max(0, positionUs - latencyUs);
       }
-      Log.d(TAG, "useGetTimestampMode no positionUs: "+positionUs);
+//      Log.d(TAG, "useGetTimestampMode no positionUs: "+positionUs);
     }
 
     if (lastSampleUsedGetTimestampMode != useGetTimestampMode) {
@@ -328,7 +328,7 @@ import java.lang.reflect.Method;
                   elapsedSincePreviousModeUs, audioTrackPlaybackSpeed);
       // A ramp consisting of 1000 points distributed over MODE_SWITCH_SMOOTHING_DURATION_US.
       long rampPoint = (elapsedSincePreviousModeUs * 1000) / MODE_SWITCH_SMOOTHING_DURATION_US;
-      Log.d(TAG, "elapsedSincePreviousModeUs: "+elapsedSincePreviousModeUs+" ramppoint: "+rampPoint );
+//      Log.d(TAG, "elapsedSincePreviousModeUs: "+elapsedSincePreviousModeUs+" ramppoint: "+rampPoint );
       positionUs *= rampPoint;
       positionUs += (1000 - rampPoint) * previousModeProjectedPositionUs;
       positionUs /= 1000;
@@ -349,7 +349,7 @@ import java.lang.reflect.Method;
     lastPositionUs = positionUs;
     lastSampleUsedGetTimestampMode = useGetTimestampMode;
 
-    Log.d(TAG, "returnt positonUs: "+ positionUs);
+//    Log.d(TAG, "returnt positonUs: "+ positionUs);
     return positionUs;
   }
 

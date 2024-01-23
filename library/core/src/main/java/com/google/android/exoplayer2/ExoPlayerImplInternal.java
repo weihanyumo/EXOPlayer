@@ -959,7 +959,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
       rendererPositionUs =
           mediaClock.syncAndGetPositionUs(
               /* isReadingAhead= */ playingPeriodHolder != queue.getReadingPeriod());
-      android.util.Log.d(TAG, "logtest  updatePlaybackPositions: renderPositionUs: "+rendererPositionUs);
+//      android.util.Log.d(TAG, "logtest  updatePlaybackPositions: renderPositionUs: "+rendererPositionUs);
       long periodPositionUs = playingPeriodHolder.toPeriodTime(rendererPositionUs);
       maybeTriggerPendingMessages(playbackInfo.positionUs, periodPositionUs);
       playbackInfo.updatePositionUs(periodPositionUs);

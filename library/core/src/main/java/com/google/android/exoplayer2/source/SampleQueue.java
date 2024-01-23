@@ -826,7 +826,7 @@ public class SampleQueue implements TrackOutput {
     else if(upstreamFormat != null && upstreamFormat.codecs != null){
       streamType = upstreamFormat.codecs;
     }
-    android.util.Log.d(TAG, streamType + ": commitSample timeUs: "+timeUs);
+//    android.util.Log.d(TAG, streamType + ": commitSample timeUs: "+timeUs);
     if (sharedSampleMetadata.isEmpty()
         || !sharedSampleMetadata.getEndValue().format.equals(upstreamFormat)) {
       DrmSessionReference drmSessionReference =

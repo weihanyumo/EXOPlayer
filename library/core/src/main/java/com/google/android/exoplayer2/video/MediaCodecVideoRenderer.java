@@ -587,7 +587,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
 
   @Override
   public boolean isReady() {
-    android.util.Log.d(TAG, "logtest superreday: "+super.isReady()+" ProcessorManager: "+(!videoFrameProcessorManager.isEnabled() || videoFrameProcessorManager.isReady())+" first:"+renderedFirstFrameAfterReset + " surface: "+(placeholderSurface != null && displaySurface == placeholderSurface));
+//    android.util.Log.d(TAG, "logtest superreday: "+super.isReady()+" ProcessorManager: "+(!videoFrameProcessorManager.isEnabled() || videoFrameProcessorManager.isReady())+" first:"+renderedFirstFrameAfterReset + " surface: "+(placeholderSurface != null && displaySurface == placeholderSurface));
     if (super.isReady()
         && (!videoFrameProcessorManager.isEnabled() || videoFrameProcessorManager.isReady())
         && (renderedFirstFrameAfterReset
@@ -1218,7 +1218,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     if (!videoFrameProcessorManager.isEnabled()) {
       earlyUs = (adjustedReleaseTimeNs - systemTimeNs) / 1000;
     } // else, use the unadjusted earlyUs in previewing use cases.
-    android.util.Log.d(TAG, "logtest  processOutputBuffer: earlyus:"+earlyUs);
+//    android.util.Log.d(TAG, "logtest  processOutputBuffer: earlyus:"+earlyUs);
     boolean treatDroppedBuffersAsSkipped = joiningDeadlineMs != C.TIME_UNSET;
     if (shouldDropBuffersToKeyframe(earlyUs, elapsedRealtimeUs, isLastBuffer)
         && maybeDropBuffersToKeyframe(positionUs, treatDroppedBuffersAsSkipped)) {
