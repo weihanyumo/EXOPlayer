@@ -632,7 +632,7 @@ public final class DefaultAudioSink implements AudioSink {
     long positionUs = audioTrackPositionTracker.getCurrentPositionUs(sourceEnded);
     positionUs = min(positionUs, configuration.framesToDurationUs(getWrittenFrames()));
     long ret = applySkipping(applyMediaPositionParameters(positionUs));
-    android.util.Log.d(TAG, "getCurrentPositionUs: "+ret);
+//    android.util.Log.d(TAG, "getCurrentPositionUs: "+ret);
     return  ret;
   }
 
