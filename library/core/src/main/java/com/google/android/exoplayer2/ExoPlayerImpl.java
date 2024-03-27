@@ -27,10 +27,12 @@ import static com.google.android.exoplayer2.Renderer.MSG_SET_PREFERRED_AUDIO_DEV
 import static com.google.android.exoplayer2.Renderer.MSG_SET_SCALING_MODE;
 import static com.google.android.exoplayer2.Renderer.MSG_SET_SKIP_SILENCE_ENABLED;
 import static com.google.android.exoplayer2.Renderer.MSG_SET_VIDEO_EFFECTS;
+import static com.google.android.exoplayer2.Renderer.MSG_SET_VIDEO_FORCERENDER_ENABLE;
 import static com.google.android.exoplayer2.Renderer.MSG_SET_VIDEO_FRAME_METADATA_LISTENER;
 import static com.google.android.exoplayer2.Renderer.MSG_SET_VIDEO_IONLY_ENABLE;
 import static com.google.android.exoplayer2.Renderer.MSG_SET_VIDEO_OUTPUT;
 import static com.google.android.exoplayer2.Renderer.MSG_SET_VIDEO_OUTPUT_RESOLUTION;
+import static com.google.android.exoplayer2.Renderer.MSG_SET_VIDEO_DROPTOKEYFRAME_ENABLE;
 import static com.google.android.exoplayer2.Renderer.MSG_SET_VOLUME;
 import static com.google.android.exoplayer2.util.Assertions.checkArgument;
 import static com.google.android.exoplayer2.util.Assertions.checkNotNull;
@@ -86,7 +88,6 @@ import com.google.android.exoplayer2.trackselection.TrackSelectionParameters;
 import com.google.android.exoplayer2.trackselection.TrackSelector;
 import com.google.android.exoplayer2.trackselection.TrackSelectorResult;
 import com.google.android.exoplayer2.upstream.BandwidthMeter;
-import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Clock;
 import com.google.android.exoplayer2.util.ConditionVariable;
 import com.google.android.exoplayer2.util.Effect;
@@ -409,8 +410,16 @@ import java.util.concurrent.TimeoutException;
           TRACK_TYPE_VIDEO, MSG_SET_VIDEO_FRAME_METADATA_LISTENER, frameMetadataListener);
       sendRendererMessage(
           TRACK_TYPE_CAMERA_MOTION, MSG_SET_CAMERA_MOTION_LISTENER, frameMetadataListener);
-      if (builder.ionlyEnabled) {
+      if (builder.iOnlyEnabled) {
         sendRendererMessage(TRACK_TYPE_VIDEO, MSG_SET_VIDEO_IONLY_ENABLE, true );
+      }
+      if (!builder.dropToKeyframe) {
+        sendRendererMessage(TRACK_TYPE_VIDEO, MSG_SET_VIDEO_DROPTOKEYFRAME_ENABLE, false );
+      }
+
+      if (!builder.forceRender) {
+
+        sendRendererMessage(TRACK_TYPE_VIDEO, MSG_SET_VIDEO_FORCERENDER_ENABLE, false );
       }
     } finally {
       constructorFinished.open();

@@ -22,7 +22,6 @@ import static com.google.android.exoplayer2.decoder.DecoderReuseEvaluation.REUSE
 import static com.google.android.exoplayer2.util.Assertions.checkNotNull;
 import static com.google.android.exoplayer2.util.Assertions.checkState;
 import static com.google.android.exoplayer2.util.Assertions.checkStateNotNull;
-import static java.lang.Math.log;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -187,6 +186,8 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
   private int tunnelingAudioSessionId;
   /* package */ @Nullable OnFrameRenderedListenerV23 tunnelingOnFrameRenderedListener;
   @Nullable private VideoFrameMetadataListener frameMetadataListener;
+  private boolean shouldDropBuffersToKeyframe;
+  private boolean shouldForceRenderBuffer;
 
   /**
    * @param context A context.
@@ -364,6 +365,9 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     scalingMode = C.VIDEO_SCALING_MODE_DEFAULT;
     decodedVideoSize = VideoSize.UNKNOWN;
     tunnelingAudioSessionId = C.AUDIO_SESSION_ID_UNSET;
+    shouldDropBuffersToKeyframe = true;
+    shouldForceRenderBuffer = true;
+
     clearReportedVideoSize();
   }
 
@@ -703,6 +707,13 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
         break;
       case MSG_SET_VIDEO_IONLY_ENABLE:
         super.ionlyEnabled = (boolean)message;
+
+      case MSG_SET_VIDEO_DROPTOKEYFRAME_ENABLE:
+        shouldDropBuffersToKeyframe = (boolean) message;
+        break;
+      case MSG_SET_VIDEO_FORCERENDER_ENABLE:
+        shouldForceRenderBuffer = (boolean) message;
+        break;
       case MSG_SET_AUDIO_ATTRIBUTES:
       case MSG_SET_AUX_EFFECT_INFO:
       case MSG_SET_CAMERA_MOTION_LISTENER:
@@ -1220,7 +1231,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     } // else, use the unadjusted earlyUs in previewing use cases.
 //    android.util.Log.d(TAG, "logtest  processOutputBuffer: earlyus:"+earlyUs);
     boolean treatDroppedBuffersAsSkipped = joiningDeadlineMs != C.TIME_UNSET;
-    if (shouldDropBuffersToKeyframe(earlyUs, elapsedRealtimeUs, isLastBuffer)
+    if (shouldDropBuffersToKeyframe && shouldDropBuffersToKeyframe(earlyUs, elapsedRealtimeUs, isLastBuffer)
         && maybeDropBuffersToKeyframe(positionUs, treatDroppedBuffersAsSkipped)) {
       return false;
     } else if (shouldDropOutputBuffer(earlyUs, elapsedRealtimeUs, isLastBuffer)) {
@@ -1228,7 +1239,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
         android.util.Log.d(TAG, "processOutputBuffer: skip:"+bufferPresentationTimeUs);
         skipOutputBuffer(codec, bufferIndex, presentationTimeUs);
       } else {
-        android.util.Log.d(TAG, "processOutputBuffer: drop "+bufferPresentationTimeUs);
+        android.util.Log.d(TAG, "logtag test processOutputBuffer: drop buffer index: "+ bufferIndex + " pts: " +bufferPresentationTimeUs);
         dropOutputBuffer(codec, bufferIndex, presentationTimeUs);
       }
       updateVideoFrameProcessingOffsetCounters(earlyUs);
@@ -1424,7 +1435,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
    */
   protected boolean shouldForceRenderOutputBuffer(long earlyUs, long elapsedSinceLastRenderUs) {
     // Force render late buffers every 100ms to avoid frozen video effect.
-    return isBufferLate(earlyUs) && elapsedSinceLastRenderUs > 100000;
+    return shouldForceRenderBuffer && isBufferLate(earlyUs) && elapsedSinceLastRenderUs > 100000;
   }
 
   /**
@@ -1623,6 +1634,8 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
   protected void renderOutputBufferV21(
       MediaCodecAdapter codec, int index, long presentationTimeUs, long releaseTimeNs) {
     TraceUtil.beginSection("releaseOutputBuffer");
+    android.util.Log.d(TAG, "renderOutputBufferV21 index: "+index+ " presentationTimeUs: "+presentationTimeUs + " releaseTimeNs: " + releaseTimeNs);
+    android.util.Log.e("haixin", "renderOutputBufferV21 index: "+index+ " presentationTimeUs: "+presentationTimeUs + " releaseTimeNs: " + releaseTimeNs);
     codec.releaseOutputBuffer(index, releaseTimeNs);
     TraceUtil.endSection();
     decoderCounters.renderedOutputBufferCount++;
