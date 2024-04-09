@@ -236,6 +236,8 @@ public interface Renderer extends PlayerMessage.Target {
 
   int MSG_SET_VIDEO_DROPTOKEYFRAME_ENABLE =16;
   int MSG_SET_VIDEO_FORCERENDER_ENABLE = 17;
+
+  int MSG_SET_PLAYERID = 18;
   int MSG_CUSTOM_BASE = 10000;
 
   /**

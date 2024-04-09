@@ -64,4 +64,5 @@ public final class TraceUtil {
   private static void endSectionV18() {
     android.os.Trace.endSection();
   }
+
 }

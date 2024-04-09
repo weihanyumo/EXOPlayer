@@ -476,6 +476,8 @@ public interface ExoPlayer extends Player {
     /* package */ boolean deviceVolumeControlEnabled;
     @C.VideoScalingMode /* package */ int videoScalingMode;
     boolean iOnlyEnabled;
+
+    int playerID;
     boolean forceRender;
     boolean dropToKeyframe;
 
@@ -941,6 +943,11 @@ public interface ExoPlayer extends Player {
       return this;
     }
 
+    public Builder setPlayerID(int playerID) {
+      checkState(!buildCalled);
+      this.playerID = playerID;
+      return this;
+    }
     public Builder setDropBuffer(boolean dropBuffer) {
       this.dropToKeyframe = dropBuffer;
       return this;

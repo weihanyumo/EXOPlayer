@@ -23,6 +23,7 @@ import static com.google.android.exoplayer2.Renderer.MSG_SET_AUDIO_SESSION_ID;
 import static com.google.android.exoplayer2.Renderer.MSG_SET_AUX_EFFECT_INFO;
 import static com.google.android.exoplayer2.Renderer.MSG_SET_CAMERA_MOTION_LISTENER;
 import static com.google.android.exoplayer2.Renderer.MSG_SET_CHANGE_FRAME_RATE_STRATEGY;
+import static com.google.android.exoplayer2.Renderer.MSG_SET_PLAYERID;
 import static com.google.android.exoplayer2.Renderer.MSG_SET_PREFERRED_AUDIO_DEVICE;
 import static com.google.android.exoplayer2.Renderer.MSG_SET_SCALING_MODE;
 import static com.google.android.exoplayer2.Renderer.MSG_SET_SKIP_SILENCE_ENABLED;
@@ -356,6 +357,7 @@ import java.util.concurrent.TimeoutException;
               playbackInfoUpdateListener,
               playerId,
               builder.playbackLooper);
+      internalPlayer.playerID = builder.playerID;
 
       volume = 1;
       repeatMode = Player.REPEAT_MODE_OFF;
@@ -413,6 +415,8 @@ import java.util.concurrent.TimeoutException;
       if (builder.iOnlyEnabled) {
         sendRendererMessage(TRACK_TYPE_VIDEO, MSG_SET_VIDEO_IONLY_ENABLE, true );
       }
+
+      sendRendererMessage(TRACK_TYPE_VIDEO, MSG_SET_PLAYERID, builder.playerID);
       if (!builder.dropToKeyframe) {
         sendRendererMessage(TRACK_TYPE_VIDEO, MSG_SET_VIDEO_DROPTOKEYFRAME_ENABLE, false );
       }

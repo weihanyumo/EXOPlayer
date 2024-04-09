@@ -18,9 +18,12 @@ package com.google.android.exoplayer2.upstream;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.net.Uri;
+import android.os.Trace;
+
 import androidx.annotation.Nullable;
 import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Log;
+import com.google.android.exoplayer2.util.TraceUtil;
 import com.google.android.exoplayer2.util.Util;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.io.IOException;
@@ -271,7 +274,11 @@ public final class DefaultDataSource implements DataSource {
 
   @Override
   public int read(byte[] buffer, int offset, int length) throws IOException {
-    return Assertions.checkNotNull(dataSource).read(buffer, offset, length);
+    TraceUtil.beginSection("DefaultDataSource_read");
+    int ret =  Assertions.checkNotNull(dataSource).read(buffer, offset, length);
+    TraceUtil.endSection();
+
+    return ret;
   }
 
   @Override

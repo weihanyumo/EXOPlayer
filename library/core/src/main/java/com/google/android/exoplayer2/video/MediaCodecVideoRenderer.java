@@ -707,6 +707,8 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
         break;
       case MSG_SET_VIDEO_IONLY_ENABLE:
         super.ionlyEnabled = (boolean)message;
+      case MSG_SET_PLAYERID:
+        super.playerID = (int)message;
 
       case MSG_SET_VIDEO_DROPTOKEYFRAME_ENABLE:
         shouldDropBuffersToKeyframe = (boolean) message;
@@ -1828,6 +1830,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     if (tunnelingAudioSessionId != C.AUDIO_SESSION_ID_UNSET) {
       configureTunnelingV21(mediaFormat, tunnelingAudioSessionId);
     }
+    mediaFormat.setInteger("vendor.player-id.value", super.playerID);
     if(super.ionlyEnabled){
       mediaFormat.setInteger("vendor.video-trickmode.enable", 1);
     }

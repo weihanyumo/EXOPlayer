@@ -385,6 +385,8 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
 
   public VideoDecoderGLSurfaceView glSurfaceView;
   public boolean ionlyEnabled;
+
+  public int playerID;
   /**
    * @param trackType The {@link C.TrackType track type} that the renderer handles.
    * @param codecAdapterFactory A factory for {@link MediaCodecAdapter} instances.

@@ -47,6 +47,7 @@ import com.google.android.exoplayer2.util.Assertions;
 import com.google.android.exoplayer2.util.Log;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.ParsableByteArray;
+import com.google.android.exoplayer2.util.TraceUtil;
 import com.google.android.exoplayer2.util.Util;
 import java.io.IOException;
 import org.checkerframework.checker.nullness.compatqual.NullableType;
@@ -114,6 +115,8 @@ public class SampleQueue implements TrackOutput {
 
   private long sampleOffsetUs;
   private boolean pendingSplice;
+  private int playerID;
+  static int g_playerID = 0;
 
   /**
    * Creates a sample queue without DRM resource management.
@@ -187,6 +190,7 @@ public class SampleQueue implements TrackOutput {
     largestQueuedTimestampUs = Long.MIN_VALUE;
     upstreamFormatRequired = true;
     upstreamKeyframeRequired = true;
+    playerID = g_playerID++;
   }
 
   // Called by the consuming thread when there is no loading thread.
@@ -595,13 +599,27 @@ public class SampleQueue implements TrackOutput {
   public final int sampleData(
       DataReader input, int length, boolean allowEndOfInput, @SampleDataPart int sampleDataPart)
       throws IOException {
-    return sampleDataQueue.sampleData(input, length, allowEndOfInput);
+    if (upstreamFormat.sampleMimeType.contains("video")) {
+      TraceUtil.beginSection("sampleDataInputVideo_"+playerID);
+    } else {
+      TraceUtil.beginSection("sampleDataInputAudio_"+playerID);
+    }
+    int ret = sampleDataQueue.sampleData(input, length, allowEndOfInput);
+    TraceUtil.endSection();
+
+    return ret;
   }
 
   @Override
   public final void sampleData(
       ParsableByteArray data, int length, @SampleDataPart int sampleDataPart) {
+    if (upstreamFormat.sampleMimeType.contains("video")) {
+      TraceUtil.beginSection("sampleDataVideo_"+playerID);
+    } else {
+      TraceUtil.beginSection("sampleDataAudio_"+playerID);
+    }
     sampleDataQueue.sampleData(data, length);
+    TraceUtil.endSection();
   }
 
   @Override
@@ -611,12 +629,15 @@ public class SampleQueue implements TrackOutput {
       int size,
       int offset,
       @Nullable CryptoData cryptoData) {
+
+    TraceUtil.beginSection("sampleMetadata");
     if (upstreamFormatAdjustmentRequired) {
       format(Assertions.checkStateNotNull(unadjustedUpstreamFormat));
     }
     boolean isKeyframe = (flags & C.BUFFER_FLAG_KEY_FRAME) != 0;
     if (upstreamKeyframeRequired) {
       if (!isKeyframe) {
+        TraceUtil.endSection();
         return;
       }
       upstreamKeyframeRequired = false;
@@ -627,6 +648,7 @@ public class SampleQueue implements TrackOutput {
       if (timeUs < startTimeUs) {
         // If we know that all samples are sync samples, we can discard those that come before the
         // start time on the write side of the queue.
+        TraceUtil.endSection();
         return;
       }
       if ((flags & C.BUFFER_FLAG_KEY_FRAME) == 0) {
@@ -641,6 +663,7 @@ public class SampleQueue implements TrackOutput {
     }
     if (pendingSplice) {
       if (!isKeyframe || !attemptSplice(timeUs)) {
+        TraceUtil.endSection();
         return;
       }
       pendingSplice = false;
@@ -648,6 +671,7 @@ public class SampleQueue implements TrackOutput {
 
     long absoluteOffset = sampleDataQueue.getTotalBytesWritten() - size - offset;
     commitSample(timeUs, flags, absoluteOffset, size, cryptoData);
+    TraceUtil.endSection();
   }
 
   /**

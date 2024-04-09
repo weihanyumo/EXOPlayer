@@ -208,8 +208,8 @@ import java.nio.ByteBuffer;
       videoOutputBuffer.data = deepCopyVisible(buffer);
       videoOutputBuffer.initForYuvFrame(width, height,yStride,yStride/2,VideoDecoderOutputBuffer.COLORSPACE_BT709);
       glSurfaceView.setOutputBuffer(videoOutputBuffer);
-    }
-    {
+      codec.releaseOutputBuffer(index, false);
+    } else {
       codec.releaseOutputBuffer(index, renderTimeStampNs);
     }
   }

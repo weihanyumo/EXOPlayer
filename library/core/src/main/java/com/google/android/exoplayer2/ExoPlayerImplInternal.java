@@ -228,6 +228,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
   @Nullable private ExoPlaybackException pendingRecoverableRendererError;
   private long setForegroundModeTimeoutMs;
   private long playbackMaybeBecameStuckAtMs;
+  public int playerID;
 
   public ExoPlayerImplInternal(
       Renderer[] renderers,
@@ -1027,7 +1028,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
       return;
     }
 
-    TraceUtil.beginSection("doSomeWork");
+    TraceUtil.beginSection("doSomeWork_"+playerID);
 
     updatePlaybackPositions();
 
