@@ -613,10 +613,12 @@ public class SampleQueue implements TrackOutput {
   @Override
   public final void sampleData(
       ParsableByteArray data, int length, @SampleDataPart int sampleDataPart) {
-    if (upstreamFormat.sampleMimeType.contains("video")) {
-      TraceUtil.beginSection("sampleDataVideo_"+playerID);
-    } else {
-      TraceUtil.beginSection("sampleDataAudio_"+playerID);
+    if(upstreamFormat != null) {
+      if (upstreamFormat.sampleMimeType.contains("video")) {
+        TraceUtil.beginSection("sampleDataVideo_" + playerID);
+      } else {
+        TraceUtil.beginSection("sampleDataAudio_" + playerID);
+      }
     }
     sampleDataQueue.sampleData(data, length);
     TraceUtil.endSection();
