@@ -1932,18 +1932,6 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
       isLastOutputBuffer =
           lastBufferInStreamPresentationTimeUs == outputBufferInfo.presentationTimeUs;
       updateOutputFormatForTime(outputBufferInfo.presentationTimeUs);
-      if(outputFormat.sampleMimeType.contains("video")) {
-        android.util.Log.d(TAG, "logtag test drainOutputBuffer: use buffer new: " + outputBufferInfo.presentationTimeUs + " index: "+outputIndex);
-        android.util.Log.e("haixin", "logtag test drainOutputBuffer: use buffer new: " + outputBufferInfo.presentationTimeUs + " index: "+outputIndex);
-      }
-    }
-    else {
-      if(outputFormat.sampleMimeType.contains("video")) {
-        if (outputBufferInfo.presentationTimeUs == lastVideoPts){
-          outputBufferInfo.presentationTimeUs = (long) (lastVideoPts + 500000/outputFormat.frameRate);
-        }
-        android.util.Log.d(TAG, "logtag test drainOutputBuffer: use bufer old: " + outputBufferInfo.presentationTimeUs);
-      }
     }
 
     boolean processedOutputBuffer;

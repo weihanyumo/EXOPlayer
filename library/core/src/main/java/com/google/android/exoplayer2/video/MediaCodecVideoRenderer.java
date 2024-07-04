@@ -1636,8 +1636,6 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
   protected void renderOutputBufferV21(
       MediaCodecAdapter codec, int index, long presentationTimeUs, long releaseTimeNs) {
     TraceUtil.beginSection("releaseOutputBuffer");
-    android.util.Log.d(TAG, "renderOutputBufferV21 index: "+index+ " presentationTimeUs: "+presentationTimeUs + " releaseTimeNs: " + releaseTimeNs);
-    android.util.Log.e("haixin", "renderOutputBufferV21 index: "+index+ " presentationTimeUs: "+presentationTimeUs + " releaseTimeNs: " + releaseTimeNs);
     codec.releaseOutputBuffer(index, releaseTimeNs);
     TraceUtil.endSection();
     decoderCounters.renderedOutputBufferCount++;
