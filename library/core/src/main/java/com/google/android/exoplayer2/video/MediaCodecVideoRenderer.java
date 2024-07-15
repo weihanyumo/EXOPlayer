@@ -589,6 +589,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     return isEnded;
   }
 
+
   @Override
   public boolean isReady() {
 //    android.util.Log.d(TAG, "logtest superreday: "+super.isReady()+" ProcessorManager: "+(!videoFrameProcessorManager.isEnabled() || videoFrameProcessorManager.isReady())+" first:"+renderedFirstFrameAfterReset + " surface: "+(placeholderSurface != null && displaySurface == placeholderSurface));
@@ -707,6 +708,9 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
         break;
       case MSG_SET_VIDEO_IONLY_ENABLE:
         super.ionlyEnabled = (boolean)message;
+      case MSG_SET_LOW_LATENCY:
+        super.lowLatency = (boolean) message;
+        break;
       case MSG_SET_PLAYERID:
         super.playerID = (int)message;
 
@@ -1831,6 +1835,10 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     mediaFormat.setInteger("vendor.player-id.value", super.playerID);
     if(super.ionlyEnabled){
       mediaFormat.setInteger("vendor.video-trickmode.enable", 1);
+    }
+    if (super.lowLatency) {
+      android.util.Log.d(TAG, "getMediaFormat: lowLatency 1");
+      mediaFormat.setInteger(MediaFormat.KEY_LOW_LATENCY, 1);
     }
 
     return mediaFormat;

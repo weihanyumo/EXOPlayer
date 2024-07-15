@@ -476,6 +476,7 @@ public interface ExoPlayer extends Player {
     /* package */ boolean deviceVolumeControlEnabled;
     @C.VideoScalingMode /* package */ int videoScalingMode;
     boolean iOnlyEnabled;
+    boolean lowLatency;
 
     int playerID;
     boolean forceRender;
@@ -940,6 +941,11 @@ public interface ExoPlayer extends Player {
     public Builder setIonlyEnable(boolean ionlyEnable){
       checkState(!buildCalled);
       this.iOnlyEnabled = ionlyEnable;
+      return this;
+    }
+    public Builder setLowLatency(boolean lowLatency) {
+      checkState(!buildCalled);
+      this.lowLatency = lowLatency;
       return this;
     }
 

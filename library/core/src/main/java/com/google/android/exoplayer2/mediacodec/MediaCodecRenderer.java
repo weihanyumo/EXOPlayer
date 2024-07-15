@@ -385,6 +385,7 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
 
   public VideoDecoderGLSurfaceView glSurfaceView;
   public boolean ionlyEnabled;
+  public boolean lowLatency;
 
   public int playerID;
   /**
