@@ -615,7 +615,7 @@ public final class VideoFrameReleaseHelper {
     @Override
     public void doFrame(long vsyncTimeNs) {
       sampledVsyncTimeNs = vsyncTimeNs;
-      android.util.Log.d(TAG, "doFrame: "+sampledVsyncTimeNs);
+//      android.util.Log.d(TAG, "doFrame: "+sampledVsyncTimeNs);
       checkNotNull(choreographer).postFrameCallbackDelayed(this, VSYNC_SAMPLE_UPDATE_PERIOD_MS);
     }
 

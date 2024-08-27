@@ -133,7 +133,7 @@ import java.lang.annotation.Target;
     if (audioTimestamp == null || (systemTimeUs - lastTimestampSampleTimeUs) < sampleIntervalUs) {
       return false;
     }
-    Log.d("audioposition", "maybePollTimestamp: "+ systemTimeUs + " lastTimestampSampleTimeUs: "+ lastTimestampSampleTimeUs +" sampleIntervalUs: "+sampleIntervalUs);
+//    Log.d("audioposition", "maybePollTimestamp: "+ systemTimeUs + " lastTimestampSampleTimeUs: "+ lastTimestampSampleTimeUs +" sampleIntervalUs: "+sampleIntervalUs);
     lastTimestampSampleTimeUs = systemTimeUs;
     boolean updatedTimestamp = audioTimestamp.maybeUpdateTimestamp();
     switch (state) {
@@ -272,7 +272,7 @@ import java.lang.annotation.Target;
       default:
         throw new IllegalStateException();
     }
-    Log.d("audiotimestamppoller", "updateState: "+state + " intervalus: "+ sampleIntervalUs);
+//    Log.d("audiotimestamppoller", "updateState: "+state + " intervalus: "+ sampleIntervalUs);
   }
 
   @RequiresApi(19)

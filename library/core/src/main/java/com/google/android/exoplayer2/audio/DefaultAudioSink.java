@@ -626,7 +626,7 @@ public final class DefaultAudioSink implements AudioSink {
   @Override
   public long getCurrentPositionUs(boolean sourceEnded) {
     if (!isAudioTrackInitialized() || startMediaTimeUsNeedsInit) {
-      android.util.Log.d(TAG, "getCurrentPositionUs: not set");
+//      android.util.Log.d(TAG, "getCurrentPositionUs: not set");
       return CURRENT_POSITION_NOT_SET;
     }
     long positionUs = audioTrackPositionTracker.getCurrentPositionUs(sourceEnded);

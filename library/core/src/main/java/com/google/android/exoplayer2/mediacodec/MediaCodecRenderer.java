@@ -1302,9 +1302,9 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
     }
     if( ionlyEnabled && inputFormat.sampleMimeType.contains("video")) {
       if (buffer.isKeyFrame()) {
-        android.util.Log.d(TAG, "feedInputBuffer: key frame pts: " + (buffer.timeUs));
+//        android.util.Log.d(TAG, "feedInputBuffer: key frame pts: " + (buffer.timeUs));
       } else {
-        android.util.Log.d(TAG, "feedInputBuffer: key frame not pts:" + buffer.timeUs);
+//        android.util.Log.d(TAG, "feedInputBuffer: key frame not pts:" + buffer.timeUs);
         buffer.clear();
         return true;
       }

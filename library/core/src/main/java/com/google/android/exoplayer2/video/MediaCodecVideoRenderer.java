@@ -564,7 +564,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
   @Override
   protected void onPositionReset(long positionUs, boolean joining) throws ExoPlaybackException {
     super.onPositionReset(positionUs, joining);
-    android.util.Log.d(TAG, "onPositionReset: "+positionUs);
+//    android.util.Log.d(TAG, "onPositionReset: "+positionUs);
     if (videoFrameProcessorManager.isEnabled()) {
       videoFrameProcessorManager.flush();
     }
@@ -707,13 +707,16 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
         }
         break;
       case MSG_SET_VIDEO_IONLY_ENABLE:
+        android.util.Log.d(TAG, "handleMessage: ionly: "+ message);
         super.ionlyEnabled = (boolean)message;
+        break;
       case MSG_SET_LOW_LATENCY:
+        android.util.Log.d(TAG, "handleMessage: lowlatency: "+ message);
         super.lowLatency = (boolean) message;
         break;
       case MSG_SET_PLAYERID:
         super.playerID = (int)message;
-
+        break;
       case MSG_SET_VIDEO_DROPTOKEYFRAME_ENABLE:
         shouldDropBuffersToKeyframe = (boolean) message;
         break;
@@ -1222,7 +1225,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     }
 
     if (!isStarted || positionUs == initialPositionUs) {
-      android.util.Log.d(TAG, "processOutputBuffer but not started: "+isStarted+ " "+initialPositionUs);
+//      android.util.Log.d(TAG, "processOutputBuffer but not started: "+isStarted+ " "+initialPositionUs);
       return false;
     }
 
@@ -1242,10 +1245,10 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
       return false;
     } else if (shouldDropOutputBuffer(earlyUs, elapsedRealtimeUs, isLastBuffer)) {
       if (treatDroppedBuffersAsSkipped) {
-        android.util.Log.d(TAG, "processOutputBuffer: skip:"+bufferPresentationTimeUs);
+//        android.util.Log.d(TAG, "processOutputBuffer: skip:"+bufferPresentationTimeUs);
         skipOutputBuffer(codec, bufferIndex, presentationTimeUs);
       } else {
-        android.util.Log.d(TAG, "logtag test processOutputBuffer: drop buffer index: "+ bufferIndex + " pts: " +bufferPresentationTimeUs);
+//        android.util.Log.d(TAG, "logtag test processOutputBuffer: drop buffer index: "+ bufferIndex + " pts: " +bufferPresentationTimeUs);
         dropOutputBuffer(codec, bufferIndex, presentationTimeUs);
       }
       updateVideoFrameProcessingOffsetCounters(earlyUs);
@@ -1693,7 +1696,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
   /* package */ void maybeNotifyRenderedFirstFrame() {
     renderedFirstFrameAfterEnable = true;
     if (!renderedFirstFrameAfterReset) {
-      android.util.Log.d(TAG, "logtest  maybeNotifyRenderedFirstFrame: ");
+//      android.util.Log.d(TAG, "logtest  maybeNotifyRenderedFirstFrame: ");
       renderedFirstFrameAfterReset = true;
       eventDispatcher.renderedFirstFrame(displaySurface);
       haveReportedFirstFrameRenderedForCurrentSurface = true;

@@ -710,7 +710,7 @@ public class MediaCodecAudioRenderer extends MediaCodecRenderer implements Media
 
     boolean fullyConsumed;
     try {
-      android.util.Log.d(TAG, "processOutputBuffer: audio presentation tiem us: "+bufferPresentationTimeUs);
+//      android.util.Log.d(TAG, "processOutputBuffer: audio presentation tiem us: "+bufferPresentationTimeUs);
       fullyConsumed = audioSink.handleBuffer(buffer, bufferPresentationTimeUs, sampleCount);
     } catch (InitializationException e) {
       throw createRendererException(
