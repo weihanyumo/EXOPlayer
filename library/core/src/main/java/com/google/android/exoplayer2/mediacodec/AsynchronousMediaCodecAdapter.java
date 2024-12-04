@@ -98,6 +98,7 @@ import java.nio.ByteBuffer;
     @Override
     public AsynchronousMediaCodecAdapter createAdapter(Configuration configuration)
         throws IOException {
+      Log.d("AsynchronousMediaCodec", "createAdapter: ");
       String codecName = configuration.codecInfo.name;
       @Nullable AsynchronousMediaCodecAdapter codecAdapter = null;
       @Nullable MediaCodec codec = null;
@@ -152,6 +153,7 @@ import java.nio.ByteBuffer;
       boolean synchronizeCodecInteractionsWithQueueing) {
     this.codec = codec;
     this.asynchronousMediaCodecCallback = new AsynchronousMediaCodecCallback(callbackThread);
+
     this.bufferEnqueuer = new AsynchronousMediaCodecBufferEnqueuer(codec, enqueueingThread);
     this.synchronizeCodecInteractionsWithQueueing = synchronizeCodecInteractionsWithQueueing;
     this.state = STATE_CREATED;
@@ -163,6 +165,7 @@ import java.nio.ByteBuffer;
       @Nullable MediaCrypto crypto,
       int flags) {
     asynchronousMediaCodecCallback.initialize(codec);
+
     TraceUtil.beginSection("configureCodec");
     codec.configure(mediaFormat, surface, crypto, flags);
     TraceUtil.endSection();
@@ -194,16 +197,16 @@ import java.nio.ByteBuffer;
   public void releaseOutputBuffer(int index, boolean render) {
     if(glSurfaceView != null ){
       if (render) {
-        VideoDecoderOutputBuffer videoOutputBuffer = new VideoDecoderOutputBuffer(this::releaseOutputBuffer);
-        videoOutputBuffer.index = index;
-        ByteBuffer buffer = codec.getOutputBuffer(index);
-        MediaFormat format = codec.getOutputFormat();
-        int width = format.getInteger(MediaFormat.KEY_WIDTH);
-        int height = format.getInteger(MediaFormat.KEY_HEIGHT);
-        int yStride = format.getInteger(MediaFormat.KEY_STRIDE);
-        videoOutputBuffer.data = deepCopyVisible(buffer);
-        videoOutputBuffer.initForYuvFrame(width, height, yStride, yStride / 2, VideoDecoderOutputBuffer.COLORSPACE_BT709);
-        glSurfaceView.setOutputBuffer(videoOutputBuffer);
+//        VideoDecoderOutputBuffer videoOutputBuffer = new VideoDecoderOutputBuffer(this::releaseOutputBuffer);
+//        videoOutputBuffer.index = index;
+//        ByteBuffer buffer = codec.getOutputBuffer(index);
+//        MediaFormat format = codec.getOutputFormat();
+//        int width = format.getInteger(MediaFormat.KEY_WIDTH);
+//        int height = format.getInteger(MediaFormat.KEY_HEIGHT);
+//        int yStride = format.getInteger(MediaFormat.KEY_STRIDE);
+//        videoOutputBuffer.data = deepCopyVisible(buffer);
+//        videoOutputBuffer.initForYuvFrame(width, height, yStride, yStride / 2, VideoDecoderOutputBuffer.COLORSPACE_BT709);
+//        glSurfaceView.setOutputBuffer(videoOutputBuffer);
       }
       codec.releaseOutputBuffer(index, false);
     } else {
@@ -214,17 +217,19 @@ import java.nio.ByteBuffer;
   @Override
   public void releaseOutputBuffer(int index, long renderTimeStampNs) {
     if(glSurfaceView != null){
-      VideoDecoderOutputBuffer videoOutputBuffer = new VideoDecoderOutputBuffer(this::releaseOutputBuffer);
-      videoOutputBuffer.index = index;
-      ByteBuffer buffer = codec.getOutputBuffer(index);
-      MediaFormat format = codec.getOutputFormat();
-      int width = format.getInteger(MediaFormat.KEY_WIDTH);
-      int height = format.getInteger(MediaFormat.KEY_HEIGHT);
-      int yStride = format.getInteger(MediaFormat.KEY_STRIDE);
-      videoOutputBuffer.data = deepCopyVisible(buffer);
-      videoOutputBuffer.initForYuvFrame(width, height,yStride,yStride/2,VideoDecoderOutputBuffer.COLORSPACE_BT709);
-      glSurfaceView.setOutputBuffer(videoOutputBuffer);
+//      VideoDecoderOutputBuffer videoOutputBuffer = new VideoDecoderOutputBuffer(this::releaseOutputBuffer);
+//      videoOutputBuffer.index = index;
+//      ByteBuffer buffer = codec.getOutputBuffer(index);
+//      MediaFormat format = codec.getOutputFormat();
+//      int width = format.getInteger(MediaFormat.KEY_WIDTH);
+//      int height = format.getInteger(MediaFormat.KEY_HEIGHT);
+//      int yStride = format.getInteger(MediaFormat.KEY_STRIDE);
+//      videoOutputBuffer.data = deepCopyVisible(buffer);
+//      videoOutputBuffer.initForYuvFrame(width, height,yStride,yStride/2,VideoDecoderOutputBuffer.COLORSPACE_BT709);
+//      glSurfaceView.setOutputBuffer(videoOutputBuffer);
+      Log.d("MediaCodecAdapter", "releaseOutputBuffer: "+index);
       codec.releaseOutputBuffer(index, false);
+
     } else {
       codec.releaseOutputBuffer(index, renderTimeStampNs);
     }
@@ -313,6 +318,11 @@ import java.nio.ByteBuffer;
 
   public void setGlSurfaceView(VideoDecoderGLSurfaceView surfaceView){
     glSurfaceView = surfaceView;
+
+    if (this.asynchronousMediaCodecCallback != null && glSurfaceView != null) {
+      Log.d("MediaCodecAdapter", "initialize: glsurfaceView: " + glSurfaceView);
+      this.asynchronousMediaCodecCallback.isGlView = true;
+    }
   }
 
   @Override

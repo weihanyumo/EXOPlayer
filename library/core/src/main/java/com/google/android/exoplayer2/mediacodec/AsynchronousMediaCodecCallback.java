@@ -23,6 +23,8 @@ import android.media.MediaCodec;
 import android.media.MediaFormat;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.util.Log;
+
 import androidx.annotation.GuardedBy;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -80,6 +82,8 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
   @Nullable
   private IllegalStateException internalException;
 
+  public boolean isGlView;
+
   /**
    * Creates a new instance.
    *
@@ -93,6 +97,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
     this.availableOutputBuffers = new IntArrayQueue();
     this.bufferInfos = new ArrayDeque<>();
     this.formats = new ArrayDeque<>();
+    this.isGlView = false;
   }
 
   /**
@@ -222,6 +227,9 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
       if (pendingOutputFormat != null) {
         addOutputFormat(pendingOutputFormat);
         pendingOutputFormat = null;
+      }
+      if (isGlView) {
+        Log.d("MediaCodecCallback", "onOutputBufferAvailable: " + index + " ptsUs:" + info.presentationTimeUs);
       }
       availableOutputBuffers.add(index);
       bufferInfos.add(info);

@@ -736,6 +736,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
 
   private void setOutput(@Nullable Object output) throws ExoPlaybackException {
     // Handle unsupported (i.e., non-Surface) outputs by clearing the display surface.
+    android.util.Log.d(TAG, "setOutput: "+output);
     if(output instanceof VideoDecoderGLSurfaceView && super.glSurfaceView == null){
       super.glSurfaceView = (VideoDecoderGLSurfaceView) output;
       return;
@@ -1643,6 +1644,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
   protected void renderOutputBufferV21(
       MediaCodecAdapter codec, int index, long presentationTimeUs, long releaseTimeNs) {
     TraceUtil.beginSection("releaseOutputBuffer");
+
     codec.releaseOutputBuffer(index, releaseTimeNs);
     TraceUtil.endSection();
     decoderCounters.renderedOutputBufferCount++;

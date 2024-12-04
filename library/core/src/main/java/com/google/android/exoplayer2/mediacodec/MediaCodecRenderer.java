@@ -28,6 +28,7 @@ import static com.google.android.exoplayer2.source.SampleStream.FLAG_PEEK;
 import static com.google.android.exoplayer2.source.SampleStream.FLAG_REQUIRE_FORMAT;
 import static com.google.android.exoplayer2.util.Assertions.checkNotNull;
 import static com.google.android.exoplayer2.util.Assertions.checkState;
+import static java.lang.Math.floorDiv;
 import static java.lang.Math.max;
 import static java.lang.annotation.ElementType.TYPE_USE;
 
@@ -1146,6 +1147,7 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
     try {
       TraceUtil.beginSection("createCodec:" + codecName);
       codec = codecAdapterFactory.createAdapter(configuration);
+      android.util.Log.d(TAG, "initCodec: " + glSurfaceView);
       codec.setGlSurfaceView(glSurfaceView);
     } finally {
       TraceUtil.endSection();

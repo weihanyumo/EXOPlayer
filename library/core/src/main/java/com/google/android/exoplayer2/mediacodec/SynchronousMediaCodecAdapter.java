@@ -177,7 +177,7 @@ public final class SynchronousMediaCodecAdapter implements MediaCodecAdapter {
       int yStride = format.getInteger(MediaFormat.KEY_STRIDE);
       videoOutputBuffer.data = deepCopyVisible(buffer);
       videoOutputBuffer.initForYuvFrame(width, height,yStride,yStride/2,VideoDecoderOutputBuffer.COLORSPACE_BT709);
-      glSurfaceView.setOutputBuffer(videoOutputBuffer);
+//      glSurfaceView.setOutputBuffer(videoOutputBuffer);
       codec.releaseOutputBuffer(index, false);
     }else {
       MediaFormat format = codec.getOutputFormat();
