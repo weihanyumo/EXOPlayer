@@ -21,6 +21,8 @@ import static java.lang.Math.min;
 
 import android.net.Uri;
 import android.os.Handler;
+import android.util.Log;
+
 import androidx.annotation.Nullable;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.C.DataType;
@@ -799,6 +801,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
   }
 
   private void startLoading() {
+    Log.d("ProgressiveMediaPeriod", "startLoading: " + uri);
     ExtractingLoadable loadable =
         new ExtractingLoadable(
             uri, dataSource, progressiveMediaExtractor, /* extractorOutput= */ this, loadCondition);

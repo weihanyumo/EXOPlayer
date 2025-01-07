@@ -622,6 +622,9 @@ import org.checkerframework.checker.nullness.compatqual.NullableType;
         offset += sizes[i];
         remainingSamplesInChunk--;
       }
+//      for (int i = 0; i < sampleCount; i++) {
+//        android.util.Log.d(TAG, "packet sizes: " + sizes[i]);
+//      }
       duration = timestampTimeUnits + timestampOffset;
 
       // If the stbl's child boxes are not consistent the container is malformed, but the stream may
