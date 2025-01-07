@@ -18,6 +18,7 @@ package com.google.android.exoplayer2;
 import static com.google.android.exoplayer2.C.TRACK_TYPE_AUDIO;
 import static com.google.android.exoplayer2.C.TRACK_TYPE_CAMERA_MOTION;
 import static com.google.android.exoplayer2.C.TRACK_TYPE_VIDEO;
+import static com.google.android.exoplayer2.Renderer.MSG_DROP_START_MS;
 import static com.google.android.exoplayer2.Renderer.MSG_SET_AUDIO_ATTRIBUTES;
 import static com.google.android.exoplayer2.Renderer.MSG_SET_AUDIO_SESSION_ID;
 import static com.google.android.exoplayer2.Renderer.MSG_SET_AUX_EFFECT_INFO;
@@ -413,6 +414,7 @@ import java.util.concurrent.TimeoutException;
           TRACK_TYPE_VIDEO, MSG_SET_VIDEO_FRAME_METADATA_LISTENER, frameMetadataListener);
       sendRendererMessage(
           TRACK_TYPE_CAMERA_MOTION, MSG_SET_CAMERA_MOTION_LISTENER, frameMetadataListener);
+      sendRendererMessage(TRACK_TYPE_VIDEO, MSG_DROP_START_MS,builder.dropStartMs);
       if (builder.iOnlyEnabled) {
         sendRendererMessage(TRACK_TYPE_VIDEO, MSG_SET_VIDEO_IONLY_ENABLE, true );
       }

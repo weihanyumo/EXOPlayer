@@ -189,6 +189,9 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
   private boolean shouldDropBuffersToKeyframe;
   private boolean shouldForceRenderBuffer;
 
+  private long firstRenderTimeMs = 0;
+  private long dropStartMs;
+
   /**
    * @param context A context.
    * @param mediaCodecSelector A decoder selector.
@@ -722,6 +725,9 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
         break;
       case MSG_SET_VIDEO_FORCERENDER_ENABLE:
         shouldForceRenderBuffer = (boolean) message;
+        break;
+      case MSG_DROP_START_MS:
+        dropStartMs = (long) message;
         break;
       case MSG_SET_AUDIO_ATTRIBUTES:
       case MSG_SET_AUX_EFFECT_INFO:
@@ -1521,6 +1527,10 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
    */
   protected void updateDroppedBufferCounters(
       int droppedInputBufferCount, int droppedDecoderBufferCount) {
+    if (System.currentTimeMillis() - firstRenderTimeMs <= dropStartMs || !renderedFirstFrameAfterReset) {
+      android.util.Log.d(TAG, "updateDroppedBufferCounters: not statistical drop: "+ droppedDecoderBufferCount);
+      return;
+    }
     decoderCounters.droppedInputBufferCount += droppedInputBufferCount;
     int totalDroppedBufferCount = droppedInputBufferCount + droppedDecoderBufferCount;
     decoderCounters.droppedBufferCount += totalDroppedBufferCount;
@@ -1700,6 +1710,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
     if (!renderedFirstFrameAfterReset) {
 //      android.util.Log.d(TAG, "logtest  maybeNotifyRenderedFirstFrame: ");
       renderedFirstFrameAfterReset = true;
+      firstRenderTimeMs = System.currentTimeMillis();
       eventDispatcher.renderedFirstFrame(displaySurface);
       haveReportedFirstFrameRenderedForCurrentSurface = true;
     }
