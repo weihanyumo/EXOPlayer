@@ -34,6 +34,7 @@ public final class RendererConfiguration {
 
   /** Whether to enable tunneling. */
   public final boolean tunneling;
+  public boolean haveAudio = true;
 
   /**
    * @param tunneling Whether to enable tunneling.

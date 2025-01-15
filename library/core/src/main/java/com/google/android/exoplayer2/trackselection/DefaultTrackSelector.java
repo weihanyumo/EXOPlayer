@@ -2971,7 +2971,14 @@ public class DefaultTrackSelector extends MappingTrackSelector
           new RendererConfiguration(/* tunneling= */ true);
       rendererConfigurations[tunnelingAudioRendererIndex] = tunnelingRendererConfiguration;
       rendererConfigurations[tunnelingVideoRendererIndex] = tunnelingRendererConfiguration;
+    } else if (tunnelingVideoRendererIndex >= 0) {
+      RendererConfiguration tunnelingRendererConfiguration =
+              new RendererConfiguration(/* tunneling= */ true);
+      tunnelingRendererConfiguration.haveAudio = false;
+
+      rendererConfigurations[tunnelingVideoRendererIndex] = tunnelingRendererConfiguration;
     }
+//
   }
 
   /**
