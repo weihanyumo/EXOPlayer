@@ -88,7 +88,7 @@ import java.nio.ByteOrder;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
-
+import android.os.Process;
 /**
  * An abstract renderer that uses {@link MediaCodec} to decode samples for rendering.
  *
@@ -818,6 +818,22 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
       if (inputFormat == null && !readSourceOmittingSampleData(FLAG_REQUIRE_FORMAT)) {
         // We still don't have a format and can't make progress without one.
         return;
+      }
+      if (inputFormat.sampleMimeType.contains("video") ) {
+        TraceUtil.beginSection("vr_q");
+        if (Process.getThreadPriority(Process.myTid()) != Process.THREAD_PRIORITY_VIDEO) {
+          Process.setThreadPriority(Process.THREAD_PRIORITY_VIDEO);
+          Log.d(TAG, "AMLEXOPlayer set video Priority to " + Process.getThreadPriority(Process.myTid()));
+        }
+        TraceUtil.endSection();
+      } else {
+        TraceUtil.beginSection("ar_q");
+        if (Process.getThreadPriority(Process.myTid()) != Process.THREAD_PRIORITY_AUDIO) {
+          Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
+          Log.d(TAG, "AMLEXOPlayer set Audio Priority to " + Process.getThreadPriority(Process.myTid()));
+        }
+
+        TraceUtil.endSection();
       }
       // We have a format.
       maybeInitCodecOrBypass();
