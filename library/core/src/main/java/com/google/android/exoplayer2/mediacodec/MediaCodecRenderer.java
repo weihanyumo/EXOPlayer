@@ -820,20 +820,10 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
         return;
       }
       if (inputFormat.sampleMimeType.contains("video") ) {
-        TraceUtil.beginSection("vr_q");
         if (Process.getThreadPriority(Process.myTid()) != Process.THREAD_PRIORITY_VIDEO) {
           Process.setThreadPriority(Process.THREAD_PRIORITY_VIDEO);
           Log.d(TAG, "AMLEXOPlayer set video Priority to " + Process.getThreadPriority(Process.myTid()));
         }
-        TraceUtil.endSection();
-      } else {
-        TraceUtil.beginSection("ar_q");
-        if (Process.getThreadPriority(Process.myTid()) != Process.THREAD_PRIORITY_AUDIO) {
-          Process.setThreadPriority(Process.THREAD_PRIORITY_AUDIO);
-          Log.d(TAG, "AMLEXOPlayer set Audio Priority to " + Process.getThreadPriority(Process.myTid()));
-        }
-
-        TraceUtil.endSection();
       }
       // We have a format.
       maybeInitCodecOrBypass();
