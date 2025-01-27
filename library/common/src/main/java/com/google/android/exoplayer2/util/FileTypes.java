@@ -89,6 +89,7 @@ public final class FileTypes {
   public static final int MIDI = 15;
   /** File type for the AVI format. */
   public static final int AVI = 16;
+  public static final int ES = 17;
 
   @VisibleForTesting /* package */ static final String HEADER_CONTENT_TYPE = "Content-Type";
 

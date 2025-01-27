@@ -48,6 +48,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.attribute.FileTime;
+import java.nio.file.spi.FileTypeDetector;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -116,6 +118,7 @@ public final class DefaultExtractorsFactory implements ExtractorsFactory {
         FileTypes.AVI,
         FileTypes.MIDI,
         FileTypes.JPEG,
+        FileTypes.ES,
       };
 
   private static final ExtensionLoader FLAC_EXTENSION_LOADER =
@@ -462,6 +465,9 @@ public final class DefaultExtractorsFactory implements ExtractorsFactory {
         break;
       case FileTypes.AVI:
         extractors.add(new AviExtractor());
+        break;
+      case FileTypes.ES:
+        extractors.add(new ESExtractor());
         break;
       case FileTypes.WEBVTT:
       case FileTypes.UNKNOWN:
