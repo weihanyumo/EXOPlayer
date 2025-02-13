@@ -15,6 +15,8 @@
  */
 package com.google.android.exoplayer2.source.chunk;
 
+import android.util.Log;
+
 import androidx.annotation.Nullable;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
@@ -127,6 +129,7 @@ public class ContainerMediaChunk extends BaseMediaChunk {
     try {
       // Create and open the input.
       DataSpec loadDataSpec = dataSpec.subrange(nextLoadPosition);
+      Log.d("ContainerMediaChunk", "load position: " + loadDataSpec.position);
       ExtractorInput input =
           new DefaultExtractorInput(
               dataSource, loadDataSpec.position, dataSource.open(loadDataSpec));

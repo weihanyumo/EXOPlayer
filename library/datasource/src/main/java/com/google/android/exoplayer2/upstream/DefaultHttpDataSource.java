@@ -375,6 +375,7 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
     bytesRead = 0;
     bytesToRead = 0;
     transferInitializing(dataSpec);
+    android.util.Log.d(TAG, "openUrl: "+ dataSpec.uri);
 
     String responseMessage;
     HttpURLConnection connection;
