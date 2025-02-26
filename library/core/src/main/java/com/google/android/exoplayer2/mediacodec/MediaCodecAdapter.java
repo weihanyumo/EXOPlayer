@@ -18,12 +18,14 @@ package com.google.android.exoplayer2.mediacodec;
 import android.media.MediaCodec;
 import android.media.MediaCrypto;
 import android.media.MediaFormat;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PersistableBundle;
 import android.view.Surface;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.decoder.CryptoInfo;
@@ -82,7 +84,12 @@ public interface MediaCodecAdapter {
         Format format,
         @Nullable Surface surface,
         @Nullable MediaCrypto crypto) {
-      return new Configuration(codecInfo, mediaFormat, format, surface, crypto, /* flags= */ 0);
+      int flags = 0;
+
+      if (Build.VERSION.SDK_INT >= 34) {
+        flags = MediaCodec.CONFIGURE_FLAG_USE_CRYPTO_ASYNC;
+      }
+      return new Configuration(codecInfo, mediaFormat, format, surface, crypto, /* flags= */ flags);
     }
 
     /** Information about the {@link MediaCodec} being configured. */

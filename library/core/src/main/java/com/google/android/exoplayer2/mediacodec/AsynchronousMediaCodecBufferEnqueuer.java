@@ -59,7 +59,7 @@ class AsynchronousMediaCodecBufferEnqueuer {
   @GuardedBy("MESSAGE_PARAMS_INSTANCE_POOL")
   private static final ArrayDeque<MessageParams> MESSAGE_PARAMS_INSTANCE_POOL = new ArrayDeque<>();
 
-  private static final Object QUEUE_SECURE_LOCK = new Object();
+  private final Object QUEUE_SECURE_LOCK = new Object();
 
   private final MediaCodec codec;
   private final HandlerThread handlerThread;
@@ -242,9 +242,9 @@ class AsynchronousMediaCodecBufferEnqueuer {
       // Synchronize calls to MediaCodec.queueSecureInputBuffer() to avoid race conditions inside
       // the crypto module when audio and video are sharing the same DRM session
       // (see [Internal: b/149908061]).
-      synchronized (QUEUE_SECURE_LOCK) {
+//      synchronized (QUEUE_SECURE_LOCK) {
         codec.queueSecureInputBuffer(index, offset, info, presentationTimeUs, flags);
-      }
+//      }
     } catch (RuntimeException e) {
       pendingRuntimeException.compareAndSet(null, e);
     }
