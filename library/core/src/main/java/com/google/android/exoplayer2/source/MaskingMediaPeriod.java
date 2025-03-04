@@ -233,6 +233,11 @@ public final class MaskingMediaPeriod implements MediaPeriod, MediaPeriod.Callba
   }
 
   @Override
+  public boolean continueLoadingChunk(long positionUs) {
+    return mediaPeriod != null && mediaPeriod.continueLoadingChunk(positionUs);
+  }
+
+  @Override
   public boolean isLoading() {
     return mediaPeriod != null && mediaPeriod.isLoading();
   }
@@ -240,6 +245,11 @@ public final class MaskingMediaPeriod implements MediaPeriod, MediaPeriod.Callba
   @Override
   public void onContinueLoadingRequested(MediaPeriod source) {
     castNonNull(callback).onContinueLoadingRequested(this);
+  }
+
+  @Override
+  public void onContinueLoadingChunkRequeested(MediaPeriod source) {
+    castNonNull(callback).onContinueLoadingChunkRequeested(this);
   }
 
   // MediaPeriod.Callback implementation

@@ -37,6 +37,9 @@ public interface SequenceableLoader {
      * to be called when it can continue to load data. Called on the playback thread.
      */
     void onContinueLoadingRequested(T source);
+    default void onContinueLoadingChunkRequeested(T source) {
+      //if do nothing
+    }
   }
 
   /**
@@ -61,6 +64,9 @@ public interface SequenceableLoader {
    */
   boolean continueLoading(long positionUs);
 
+  default boolean continueLoadingChunk(long positionUs) {
+    return true;
+  }
   /** Returns whether the loader is currently loading. */
   boolean isLoading();
 

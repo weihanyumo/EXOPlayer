@@ -329,6 +329,10 @@ import org.checkerframework.checker.nullness.compatqual.NullableType;
   }
 
   @Override
+  public boolean continueLoadingChunk(long positionUs) {
+    return compositeSequenceableLoader.continueLoadingChunk(positionUs);
+  }
+  @Override
   public boolean isLoading() {
     return compositeSequenceableLoader.isLoading();
   }
@@ -376,6 +380,10 @@ import org.checkerframework.checker.nullness.compatqual.NullableType;
     callback.onContinueLoadingRequested(this);
   }
 
+  @Override
+  public void onContinueLoadingChunkRequeested(ChunkSampleStream<DashChunkSource> sampleStream) {
+    callback.onContinueLoadingChunkRequeested(this);
+  }
   // Internal methods.
 
   private int[] getStreamIndexToTrackGroupIndex(ExoTrackSelection[] selections) {

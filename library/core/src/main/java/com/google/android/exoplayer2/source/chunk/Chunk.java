@@ -40,7 +40,10 @@ import java.util.Map;
  */
 @Deprecated
 public abstract class Chunk implements Loadable {
+  interface Callback {
 
+    void continueLoadingChunkRequested();
+  }
   /** Identifies the load task for this loadable. */
   public final long loadTaskId;
   /** The {@link DataSpec} that defines the data to be loaded. */
@@ -72,6 +75,8 @@ public abstract class Chunk implements Loadable {
   public final long endTimeUs;
 
   protected final StatsDataSource dataSource;
+
+  public Callback callback;
 
   /**
    * @param dataSource The source from which the data should be loaded.
@@ -135,5 +140,9 @@ public abstract class Chunk implements Loadable {
    */
   public final Map<String, List<String>> getResponseHeaders() {
     return dataSource.getLastResponseHeaders();
+  }
+
+  public boolean continueLoading(long playbackPositionUs) {
+    return true;
   }
 }

@@ -90,7 +90,13 @@ public class CompositeSequenceableLoader implements SequenceableLoader {
     } while (madeProgressThisIteration);
     return madeProgress;
   }
-
+  @Override
+  public boolean continueLoadingChunk(long positionUs) {
+      for (SequenceableLoader loader : loaders) {
+         loader.continueLoadingChunk(positionUs);
+      }
+      return true;
+  }
   @Override
   public boolean isLoading() {
     for (SequenceableLoader loader : loaders) {

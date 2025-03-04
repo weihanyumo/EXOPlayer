@@ -15,6 +15,7 @@
  */
 package com.google.android.exoplayer2.mediacodec;
 
+import static java.lang.Math.log;
 import static java.lang.Math.max;
 
 import android.annotation.SuppressLint;
@@ -393,6 +394,8 @@ public final class MediaCodecUtil {
       int numberOfCodecs = mediaCodecList.getCodecCount();
       boolean secureDecodersExplicit = mediaCodecList.secureDecodersExplicit();
       // Note: MediaCodecList is sorted by the framework such that the best decoders come first.
+      android.util.Log.d(TAG, "getDecoderInfosInternal: "+ key);
+
       for (int i = 0; i < numberOfCodecs; i++) {
         android.media.MediaCodecInfo codecInfo = mediaCodecList.getCodecInfoAt(i);
         if (isAlias(codecInfo)) {
@@ -401,6 +404,8 @@ public final class MediaCodecUtil {
           continue;
         }
         String name = codecInfo.getName();
+
+        android.util.Log.d(TAG, "getDecoderInfosInternal: "+ name);
         if (!isCodecUsableDecoder(codecInfo, name, secureDecodersExplicit, mimeType)) {
           continue;
         }

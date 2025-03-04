@@ -16,6 +16,7 @@
 package com.google.android.exoplayer2.source.chunk;
 
 import static com.google.android.exoplayer2.util.Assertions.checkNotNull;
+import static com.google.android.exoplayer2.util.Util.castNonNull;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -59,7 +60,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  */
 @Deprecated
 public class ChunkSampleStream<T extends ChunkSource>
-    implements SampleStream, SequenceableLoader, Loader.Callback<Chunk>, Loader.ReleaseCallback {
+    implements SampleStream, SequenceableLoader, Loader.Callback<Chunk>, Loader.ReleaseCallback, Chunk.Callback{
 
   /** A callback to be notified when a sample stream has finished being released. */
   public interface ReleaseCallback<T extends ChunkSource> {
@@ -563,6 +564,13 @@ public class ChunkSampleStream<T extends ChunkSource>
   }
 
   // SequenceableLoader implementation
+  @Override
+  public boolean continueLoadingChunk(long positionUs) {
+    if (loadingChunk != null) {
+      loadingChunk.continueLoading(positionUs);
+    }
+    return true;
+  }
 
   @Override
   public boolean continueLoading(long positionUs) {
@@ -583,6 +591,7 @@ public class ChunkSampleStream<T extends ChunkSource>
     chunkSource.getNextChunk(positionUs, loadPositionUs, chunkQueue, nextChunkHolder);
     boolean endOfStream = nextChunkHolder.endOfStream;
     @Nullable Chunk loadable = nextChunkHolder.chunk;
+    loadable.callback = this;
     nextChunkHolder.clear();
 
     if (endOfStream) {
@@ -673,6 +682,10 @@ public class ChunkSampleStream<T extends ChunkSource>
     }
   }
 
+  @Override
+  public void continueLoadingChunkRequested() {
+    castNonNull(callback).onContinueLoadingChunkRequeested(this);
+  }
   private void discardUpstream(int preferredQueueSize) {
     Assertions.checkState(!loader.isLoading());
 

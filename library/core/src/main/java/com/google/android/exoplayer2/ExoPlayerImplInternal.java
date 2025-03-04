@@ -167,6 +167,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
   private static final int MSG_ATTEMPT_RENDERER_ERROR_RECOVERY = 25;
   private static final int MSG_RENDERER_CAPABILITIES_CHANGED = 26;
 
+  private static final int MSG_SOURCE_CONTINUE_LOADING_Chunk = 27;
   private static final int ACTIVE_INTERVAL_MS = 10;
   private static final int IDLE_INTERVAL_MS = 1000;
   /**
@@ -215,6 +216,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
   private boolean pendingPauseAtEndOfPeriod;
   private boolean isRebuffering;
   private boolean shouldContinueLoading;
+  private boolean shouldContinueLoadingChunk;
   private @Player.RepeatMode int repeatMode;
   private boolean shuffleModeEnabled;
   private boolean foregroundMode;
@@ -476,6 +478,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
     handler.obtainMessage(MSG_SOURCE_CONTINUE_LOADING_REQUESTED, source).sendToTarget();
   }
 
+  @Override
+  public void onContinueLoadingChunkRequeested(MediaPeriod source) {
+    handler.obtainMessage(MSG_SOURCE_CONTINUE_LOADING_Chunk, source).sendToTarget();
+  }
+
   // TrackSelector.InvalidationListener implementation.
 
   @Override
@@ -543,6 +550,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
           break;
         case MSG_SOURCE_CONTINUE_LOADING_REQUESTED:
           handleContinueLoadingRequested((MediaPeriod) msg.obj);
+          break;
+        case MSG_SOURCE_CONTINUE_LOADING_Chunk:
+          handleContinueLoadingChunk((MediaPeriod) msg.obj);
           break;
         case MSG_TRACK_SELECTION_INVALIDATED:
           reselectTracksInternal();
@@ -1493,6 +1503,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
     queue.clear();
     shouldContinueLoading = false;
+    shouldContinueLoadingChunk = false;
+
 
     Timeline timeline = playbackInfo.timeline;
     if (releaseMediaSourceList && timeline instanceof PlaylistTimeline) {
@@ -2088,6 +2100,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
     } else {
       maybeContinueLoading();
     }
+    if (!shouldContinueLoadingChunk) {
+      shouldContinueLoadingChunk = shouldContinueLoadingChunk();
+      if (shouldContinueLoadingChunk) {
+        queue.getLoadingPeriod().continueLoadingChunk(rendererPositionUs);
+      }
+    }
   }
 
   private void maybeUpdateReadingPeriod() throws ExoPlaybackException {
@@ -2357,6 +2375,17 @@ import java.util.concurrent.atomic.AtomicBoolean;
     maybeContinueLoading();
   }
 
+  private void handleContinueLoadingChunk(MediaPeriod mediaPeriod) {
+    if (!queue.isLoading(mediaPeriod)) {
+      // Stale event.
+      return;
+    }
+    shouldContinueLoadingChunk = shouldContinueLoadingChunk();
+    android.util.Log.d(TAG, "handleContinueLoadingChunk: "+ shouldContinueLoadingChunk);
+    if (shouldContinueLoadingChunk) {
+      queue.getLoadingPeriod().continueLoadingChunk(rendererPositionUs);
+    }
+  }
   private void handlePlaybackParameters(
       PlaybackParameters playbackParameters, boolean acknowledgeCommand)
       throws ExoPlaybackException {
@@ -2426,7 +2455,39 @@ import java.util.concurrent.atomic.AtomicBoolean;
     }
     return shouldContinueLoading;
   }
+  private boolean shouldContinueLoadingChunk() {
+    if (!isLoadingPossible()) {
+      return false;
+    }
+    MediaPeriodHolder loadingPeriodHolder = queue.getLoadingPeriod();
 
+    long totalBufferedDurationUs = loadingPeriodHolder.getBufferedPositionUs() - loadingPeriodHolder.toPeriodTime(rendererPositionUs);
+    long bufferedDurationUs = max(0, totalBufferedDurationUs);
+    long playbackPositionUs =
+            loadingPeriodHolder == queue.getPlayingPeriod()
+                    ? loadingPeriodHolder.toPeriodTime(rendererPositionUs)
+                    : loadingPeriodHolder.toPeriodTime(rendererPositionUs)
+                    - loadingPeriodHolder.info.startPositionUs;
+    android.util.Log.d(TAG, "shouldContinueLoadingChunk: " + bufferedDurationUs + " playPosition: " + playbackPositionUs);
+    boolean shouldContinueLoadingtmp =
+            loadControl.shouldContinueLoading(
+                    playbackPositionUs, bufferedDurationUs, mediaClock.getPlaybackParameters().speed);
+    if (!shouldContinueLoadingtmp
+            && bufferedDurationUs < PLAYBACK_BUFFER_EMPTY_THRESHOLD_US
+            && (backBufferDurationUs > 0 || retainBackBufferFromKeyframe)) {
+      // LoadControl doesn't want to continue loading despite no buffered data. Clear back buffer
+      // and try again in case it's blocked on memory usage of the back buffer.
+      queue
+              .getPlayingPeriod()
+              .mediaPeriod
+              .discardBuffer(playbackInfo.positionUs, /* toKeyframe= */ false);
+      shouldContinueLoadingtmp =
+              loadControl.shouldContinueLoading(
+                      playbackPositionUs, bufferedDurationUs, mediaClock.getPlaybackParameters().speed);
+    }
+
+    return shouldContinueLoadingtmp;
+  }
   private boolean isLoadingPossible() {
     MediaPeriodHolder loadingPeriodHolder = queue.getLoadingPeriod();
     if (loadingPeriodHolder == null) {

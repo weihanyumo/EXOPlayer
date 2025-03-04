@@ -52,6 +52,7 @@ import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.NalUnitUtil;
 import com.google.android.exoplayer2.util.ParsableByteArray;
 import com.google.android.exoplayer2.util.TimestampAdjuster;
+import com.google.android.exoplayer2.util.TraceUtil;
 import com.google.android.exoplayer2.util.Util;
 import java.io.IOException;
 import java.lang.annotation.Documented;
@@ -335,10 +336,13 @@ public class FragmentedMp4Extractor implements Extractor {
 
   @Override
   public int read(ExtractorInput input, PositionHolder seekPosition) throws IOException {
+
+    TraceUtil.beginSection("FragmentedMp4Extractor_read");
     while (true) {
       switch (parserState) {
         case STATE_READING_ATOM_HEADER:
           if (!readAtomHeader(input)) {
+            TraceUtil.endSection();
             return Extractor.RESULT_END_OF_INPUT;
           }
           break;
@@ -350,6 +354,7 @@ public class FragmentedMp4Extractor implements Extractor {
           break;
         default:
           if (readSample(input)) {
+            TraceUtil.endSection();
             return RESULT_CONTINUE;
           }
       }

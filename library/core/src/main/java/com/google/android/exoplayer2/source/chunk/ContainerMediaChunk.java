@@ -15,6 +15,7 @@
  */
 package com.google.android.exoplayer2.source.chunk;
 
+import static com.google.android.exoplayer2.util.Assertions.checkNotNull;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -27,7 +28,9 @@ import com.google.android.exoplayer2.source.chunk.ChunkExtractor.TrackOutputProv
 import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSourceUtil;
 import com.google.android.exoplayer2.upstream.DataSpec;
+import com.google.android.exoplayer2.util.ConditionVariable;
 import java.io.IOException;
+import java.io.InterruptedIOException;
 
 /**
  * A {@link BaseMediaChunk} that uses an {@link Extractor} to decode sample data.
@@ -39,6 +42,7 @@ import java.io.IOException;
  */
 @Deprecated
 public class ContainerMediaChunk extends BaseMediaChunk {
+  private static String TAG = "ContainerMediaChunk";
 
   private final int chunkCount;
   private final long sampleOffsetUs;
@@ -47,6 +51,7 @@ public class ContainerMediaChunk extends BaseMediaChunk {
   private long nextLoadPosition;
   private volatile boolean loadCanceled;
   private boolean loadCompleted;
+  private ConditionVariable loadCondition = new ConditionVariable();
 
   /**
    * @param dataSource The source from which the data should be loaded.
@@ -92,6 +97,7 @@ public class ContainerMediaChunk extends BaseMediaChunk {
         clippedStartTimeUs,
         clippedEndTimeUs,
         chunkIndex);
+    Log.d(TAG, "ContainerMediaChunk chunkCount: "+ chunkCount);
     this.chunkCount = chunkCount;
     this.sampleOffsetUs = sampleOffsetUs;
     this.chunkExtractor = chunkExtractor;
@@ -111,6 +117,8 @@ public class ContainerMediaChunk extends BaseMediaChunk {
 
   @Override
   public final void cancelLoad() {
+    Log.d(TAG, "cancelLoad: ");
+    loadCondition.open();
     loadCanceled = true;
   }
 
@@ -129,13 +137,36 @@ public class ContainerMediaChunk extends BaseMediaChunk {
     try {
       // Create and open the input.
       DataSpec loadDataSpec = dataSpec.subrange(nextLoadPosition);
-      Log.d("ContainerMediaChunk", "load position: " + loadDataSpec.position);
+      Log.d(TAG, "load position: " + loadDataSpec.position);
       ExtractorInput input =
           new DefaultExtractorInput(
               dataSource, loadDataSpec.position, dataSource.open(loadDataSpec));
       // Load and decode the sample data.
+      long position = input.getPosition();
+      boolean result = true;
+      loadCondition.open();
       try {
-        while (!loadCanceled && chunkExtractor.read(input)) {}
+        while (result && !loadCanceled) {
+          try {
+            loadCondition.block();
+          } catch (InterruptedException e) {
+            throw new InterruptedIOException();
+          }
+          result = chunkExtractor.read(input);
+          if (!result) {
+            break;
+          }
+          long currentInputPosition = input.getPosition();
+//          Log.d("ContainerMediaChunk", "load currentPos: "+ currentInputPosition + " startPos: "+ position + " delta: "+ (currentInputPosition-position) );
+          if (currentInputPosition > position + 1024 * 1024) {
+            position = currentInputPosition;
+            Log.d(TAG, "loadCondition close: "+ loadCondition);
+            loadCondition.close();
+            if (!loadCanceled) {
+              checkNotNull(callback).continueLoadingChunkRequested();
+            }
+          }
+        }
       } finally {
         nextLoadPosition = input.getPosition() - dataSpec.position;
       }
@@ -143,6 +174,11 @@ public class ContainerMediaChunk extends BaseMediaChunk {
       DataSourceUtil.closeQuietly(dataSource);
     }
     loadCompleted = !loadCanceled;
+  }
+
+  public boolean continueLoading(long playbackPositionUs) {
+    Log.d(TAG, "continueLoading: loadCondition open: "+ loadCondition);
+    return loadCondition.open();
   }
 
   /**
