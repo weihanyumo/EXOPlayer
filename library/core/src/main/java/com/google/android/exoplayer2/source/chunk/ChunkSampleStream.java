@@ -591,7 +591,6 @@ public class ChunkSampleStream<T extends ChunkSource>
     chunkSource.getNextChunk(positionUs, loadPositionUs, chunkQueue, nextChunkHolder);
     boolean endOfStream = nextChunkHolder.endOfStream;
     @Nullable Chunk loadable = nextChunkHolder.chunk;
-    loadable.callback = this;
     nextChunkHolder.clear();
 
     if (endOfStream) {
@@ -603,6 +602,7 @@ public class ChunkSampleStream<T extends ChunkSource>
     if (loadable == null) {
       return false;
     }
+    loadable.callback = this;
 
     loadingChunk = loadable;
     if (isMediaChunk(loadable)) {

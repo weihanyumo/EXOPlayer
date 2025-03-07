@@ -2381,7 +2381,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
       return;
     }
     shouldContinueLoadingChunk = shouldContinueLoadingChunk();
-    android.util.Log.d(TAG, "handleContinueLoadingChunk: "+ shouldContinueLoadingChunk);
+//    android.util.Log.d(TAG, "handleContinueLoadingChunk: "+ shouldContinueLoadingChunk);
     if (shouldContinueLoadingChunk) {
       queue.getLoadingPeriod().continueLoadingChunk(rendererPositionUs);
     }
@@ -2468,7 +2468,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
                     ? loadingPeriodHolder.toPeriodTime(rendererPositionUs)
                     : loadingPeriodHolder.toPeriodTime(rendererPositionUs)
                     - loadingPeriodHolder.info.startPositionUs;
-    android.util.Log.d(TAG, "shouldContinueLoadingChunk: " + bufferedDurationUs + " playPosition: " + playbackPositionUs);
+    //android.util.Log.d(TAG, "shouldContinueLoadingChunk: " + bufferedDurationUs + " playPosition: " + playbackPositionUs);
     boolean shouldContinueLoadingtmp =
             loadControl.shouldContinueLoading(
                     playbackPositionUs, bufferedDurationUs, mediaClock.getPlaybackParameters().speed);

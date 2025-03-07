@@ -229,7 +229,7 @@ import org.checkerframework.checker.nullness.compatqual.NullableType;
     mediaPeriod.continueLoading(loadingPeriodPositionUs);
   }
   public void continueLoadingChunk(long rendererPositionUs) {
-    android.util.Log.d(TAG, "continueLoadingChunk: " + rendererPositionUs);
+//    android.util.Log.d(TAG, "continueLoadingChunk: " + rendererPositionUs);
     Assertions.checkState(isLoadingMediaPeriod());
     long loadingPeriodPositionUs = toPeriodTime(rendererPositionUs);
     mediaPeriod.continueLoadingChunk(loadingPeriodPositionUs);

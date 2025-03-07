@@ -119,7 +119,7 @@ public class ContainerMediaChunk extends BaseMediaChunk {
 
   @Override
   public final void cancelLoad() {
-    Log.d(TAG, "cancelLoad: ");
+//    Log.d(TAG, "cancelLoad: ");
     loadCondition.open();
     loadCanceled = true;
   }
@@ -162,7 +162,7 @@ public class ContainerMediaChunk extends BaseMediaChunk {
 //          Log.d("ContainerMediaChunk", "load currentPos: "+ currentInputPosition + " startPos: "+ position + " delta: "+ (currentInputPosition-position) );
           if (currentInputPosition > position + 128 * 1024) {
             position = currentInputPosition;
-            Log.d(TAG, "loadCondition close: "+ loadCondition);
+//            Log.d(TAG, "loadCondition close: "+ loadCondition);
             loadCondition.close();
             TraceUtil.beginSection("askContinue");
             if (!loadCanceled) {
@@ -184,7 +184,7 @@ public class ContainerMediaChunk extends BaseMediaChunk {
   }
 
   public boolean continueLoading(long playbackPositionUs) {
-    Log.d(TAG, "continueLoading: loadCondition open: "+ loadCondition);
+//    Log.d(TAG, "continueLoading: loadCondition open: "+ loadCondition);
     return loadCondition.open();
   }
 
