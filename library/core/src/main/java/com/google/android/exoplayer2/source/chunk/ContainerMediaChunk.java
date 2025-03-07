@@ -29,6 +29,8 @@ import com.google.android.exoplayer2.upstream.DataSource;
 import com.google.android.exoplayer2.upstream.DataSourceUtil;
 import com.google.android.exoplayer2.upstream.DataSpec;
 import com.google.android.exoplayer2.util.ConditionVariable;
+import com.google.android.exoplayer2.util.TraceUtil;
+
 import java.io.IOException;
 import java.io.InterruptedIOException;
 
@@ -158,15 +160,20 @@ public class ContainerMediaChunk extends BaseMediaChunk {
           }
           long currentInputPosition = input.getPosition();
 //          Log.d("ContainerMediaChunk", "load currentPos: "+ currentInputPosition + " startPos: "+ position + " delta: "+ (currentInputPosition-position) );
-          if (currentInputPosition > position + 1024 * 1024) {
+          if (currentInputPosition > position + 128 * 1024) {
             position = currentInputPosition;
             Log.d(TAG, "loadCondition close: "+ loadCondition);
             loadCondition.close();
+            TraceUtil.beginSection("askContinue");
             if (!loadCanceled) {
               checkNotNull(callback).continueLoadingChunkRequested();
             }
+            TraceUtil.endSection();
           }
+          Thread.sleep(1);
         }
+      } catch (InterruptedException e) {
+          throw new RuntimeException(e);
       } finally {
         nextLoadPosition = input.getPosition() - dataSpec.position;
       }

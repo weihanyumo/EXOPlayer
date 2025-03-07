@@ -21,12 +21,15 @@ import static com.google.android.exoplayer2.util.Util.castNonNull;
 import static java.lang.Math.min;
 
 import android.net.Uri;
+import android.os.Trace;
+
 import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.PlaybackException;
 import com.google.android.exoplayer2.upstream.DataSpec.HttpMethod;
 import com.google.android.exoplayer2.util.Log;
+import com.google.android.exoplayer2.util.TraceUtil;
 import com.google.android.exoplayer2.util.Util;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ForwardingMap;
@@ -781,7 +784,9 @@ public class DefaultHttpDataSource extends BaseDataSource implements HttpDataSou
       readLength = (int) min(readLength, bytesRemaining);
     }
 
+    TraceUtil.beginSection("inputStream_read");
     int read = castNonNull(inputStream).read(buffer, offset, readLength);
+    TraceUtil.endSection();
     if (read == -1) {
       return C.RESULT_END_OF_INPUT;
     }
