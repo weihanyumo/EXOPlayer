@@ -240,6 +240,7 @@ public interface Renderer extends PlayerMessage.Target {
   int MSG_SET_PLAYERID = 18;
   int MSG_SET_LOW_LATENCY = 19;
   int MSG_DROP_START_MS = 20;
+  int MSG_SET_PRIORITY = 21;
   int MSG_CUSTOM_BASE = 10000;
 
   /**

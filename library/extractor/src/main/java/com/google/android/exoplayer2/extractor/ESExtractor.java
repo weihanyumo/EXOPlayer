@@ -29,6 +29,7 @@ public class ESExtractor implements Extractor, SeekMap {
     private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
     private static final int BUFFER_SIZE = 1024;
     private long pts = 0;
+    private float FPS = 30;
 
     int writePos = 0;
     private ExtractorOutput output;
@@ -38,10 +39,10 @@ public class ESExtractor implements Extractor, SeekMap {
     public boolean sniff(ExtractorInput input) throws IOException {
         ParsableByteArray header = new ParsableByteArray(4);
         input.peekFully(header.getData(), 0, 4);
-        boolean is264 = isH264(header.getData());
-        return is264;
+        boolean isEsStream = isEsStream(header.getData());
+        return isEsStream;
     }
-    private boolean isH264(byte[] header) {
+    private boolean isEsStream(byte[] header) {
         return header[0] == 0x00 && header[1] == 0x00 && header[2] == 0x00 && header[3] == 0x01;
     }
     @Override
@@ -104,6 +105,7 @@ public class ESExtractor implements Extractor, SeekMap {
     }
     private Format parseSps(byte[] spsData) {
         NalUnitUtil.SpsData sps = NalUnitUtil.parseSpsNalUnit(spsData, 4, spsData.length);
+        FPS = sps.frameRate;
         return new Format.Builder()
                 .setSampleMimeType(MimeTypes.VIDEO_H264)
                 .setWidth(sps.width)
@@ -150,7 +152,7 @@ public class ESExtractor implements Extractor, SeekMap {
     }
 
     private long extractTimestamp(byte[] frame) {
-        return pts + 33000;
+        return (long) (pts + 1000000/FPS);
     }
 
     private byte[] extractFrame(byte[] data) {

@@ -389,6 +389,7 @@ public abstract class MediaCodecRenderer extends BaseRenderer {
   public boolean lowLatency;
 
   public int playerID;
+  public int priority;
   /**
    * @param trackType The {@link C.TrackType track type} that the renderer handles.
    * @param codecAdapterFactory A factory for {@link MediaCodecAdapter} instances.

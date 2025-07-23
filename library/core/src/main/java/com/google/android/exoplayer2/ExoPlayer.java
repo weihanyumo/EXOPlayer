@@ -479,6 +479,7 @@ public interface ExoPlayer extends Player {
     boolean lowLatency;
 
     int playerID;
+    int priority;
     long dropStartMs = 1000;
     boolean forceRender;
     boolean dropToKeyframe;
@@ -953,6 +954,12 @@ public interface ExoPlayer extends Player {
     public Builder setPlayerID(int playerID) {
       checkState(!buildCalled);
       this.playerID = playerID;
+      return this;
+    }
+
+    public Builder setPriority(int priority) {
+      checkState(!buildCalled);
+      this.priority = priority;
       return this;
     }
     public Builder setDropStartTime(long timeMs) {

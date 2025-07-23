@@ -745,6 +745,9 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer implements Media
       case MSG_SET_PLAYERID:
         super.playerID = (int)message;
         break;
+      case MSG_SET_PRIORITY:
+        super.priority = (int)message;
+        break;
       case MSG_SET_VIDEO_DROPTOKEYFRAME_ENABLE:
         shouldDropBuffersToKeyframe = (boolean) message;
         break;
@@ -1040,7 +1043,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer implements Media
     codecNeedsSetOutputSurfaceWorkaround = codecNeedsSetOutputSurfaceWorkaround(name);
     codecHandlesHdr10PlusOutOfBandMetadata =
         checkNotNull(getCodecInfo()).isHdr10PlusOutOfBandMetadataSupported();
-    if (Util.SDK_INT >= 23 && tunneling) {
+    if (Util.SDK_INT >= 23) {
       tunnelingOnFrameRenderedListener = new OnFrameRenderedListenerV23(checkNotNull(getCodec()));
     }
     videoFrameProcessorManager.onCodecInitialized(name);
@@ -1721,7 +1724,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer implements Media
     // non-tunneled playback, onQueueInputBuffer for tunneled playback prior to API level 23, and
     // OnFrameRenderedListenerV23.onFrameRenderedListener for tunneled playback on API level 23 and
     // above.
-    if (Util.SDK_INT >= 23 && tunneling) {
+    if (Util.SDK_INT >= 23) {
       @Nullable MediaCodecAdapter codec = getCodec();
       // If codec is null then the listener will be instantiated in configureCodec.
       if (codec != null) {
@@ -1865,7 +1868,8 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer implements Media
         mediaFormat, MediaFormat.KEY_MAX_INPUT_SIZE, codecMaxValues.inputSize);
     // Set codec configuration values.
     if (Util.SDK_INT >= 23) {
-      mediaFormat.setInteger(MediaFormat.KEY_PRIORITY, 0 /* realtime priority */);
+      android.util.Log.d(TAG, "getMediaFormat priority: " + super.priority);
+      mediaFormat.setInteger(MediaFormat.KEY_PRIORITY, super.priority);
       if (codecOperatingRate != CODEC_OPERATING_RATE_UNSET) {
         mediaFormat.setFloat(MediaFormat.KEY_OPERATING_RATE, codecOperatingRate);
       }
@@ -1878,6 +1882,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer implements Media
       configureTunnelingV21(mediaFormat, tunnelingAudioSessionId);
     }
     mediaFormat.setInteger("vendor.player-id.value", super.playerID);
+
     if(super.ionlyEnabled){
       mediaFormat.setInteger("vendor.video-trickmode.enable", 1);
     }
@@ -2871,6 +2876,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer implements Media
       // This was fixed in https://android-review.googlesource.com/1156807.
       //
       // The workaround queues the event for subsequent processing, where the lock will not be held.
+      android.util.Log.d(TAG, "onFrameRendered playerId: "+ playerID + " pts: "+ presentationTimeUs);
       if (Util.SDK_INT < 30) {
         Message message =
             Message.obtain(
