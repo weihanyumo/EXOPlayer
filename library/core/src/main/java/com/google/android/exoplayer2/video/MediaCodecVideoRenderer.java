@@ -52,7 +52,6 @@ import com.google.android.exoplayer2.ExoPlayer;
 import com.google.android.exoplayer2.Format;
 import com.google.android.exoplayer2.FormatHolder;
 import com.google.android.exoplayer2.PlaybackException;
-import com.google.android.exoplayer2.PlaybackParameters;
 import com.google.android.exoplayer2.PlayerMessage.Target;
 import com.google.android.exoplayer2.RendererCapabilities;
 import com.google.android.exoplayer2.decoder.DecoderCounters;
@@ -71,7 +70,6 @@ import com.google.android.exoplayer2.util.DebugViewProvider;
 import com.google.android.exoplayer2.util.Effect;
 import com.google.android.exoplayer2.util.FrameInfo;
 import com.google.android.exoplayer2.util.Log;
-import com.google.android.exoplayer2.util.MediaClock;
 import com.google.android.exoplayer2.util.MediaFormatUtil;
 import com.google.android.exoplayer2.util.MimeTypes;
 import com.google.android.exoplayer2.util.Size;
@@ -122,7 +120,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
  *     migration guide</a> for more details, including a script to help with the migration.
  */
 @Deprecated
-public class MediaCodecVideoRenderer extends MediaCodecRenderer implements MediaClock {
+public class MediaCodecVideoRenderer extends MediaCodecRenderer {
 
   private static final String TAG = "MediaCodecVideoRenderer";
   private static final String KEY_CROP_LEFT = "crop-left";
@@ -193,8 +191,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer implements Media
 
   private long firstRenderTimeMs = 0;
   private long dropStartMs;
-  private long playbackPosition = 0;
-  private PlaybackParameters playbackParameters;
+
   /**
    * @param context A context.
    * @param mediaCodecSelector A decoder selector.
@@ -528,28 +525,6 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer implements Media
     }
     return MediaCodecUtil.getDecoderInfosSoftMatch(
         mediaCodecSelector, format, requiresSecureDecoder, requiresTunnelingDecoder);
-  }
-  @Nullable
-  public MediaClock getMediaClock() {
-    if (tunneling) {
-      return this;
-    }
-    return null;
-  }
-
-  @Override
-  public long getPositionUs() {
-    return playbackPosition;
-  }
-
-  @Override
-  public void setPlaybackParameters(PlaybackParameters playbackParameters) {
-    this.playbackParameters = playbackParameters;
-  }
-
-  @Override
-  public PlaybackParameters getPlaybackParameters() {
-    return this.playbackParameters;
   }
 
   @RequiresApi(26)
@@ -2902,7 +2877,6 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer implements Media
     }
 
     private void handleFrameRendered(long presentationTimeUs) {
-      playbackPosition = presentationTimeUs;
       if (this != tunnelingOnFrameRenderedListener || getCodec() == null) {
         // Stale event.
         return;

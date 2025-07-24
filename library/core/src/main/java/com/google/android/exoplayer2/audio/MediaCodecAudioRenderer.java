@@ -453,9 +453,6 @@ public class MediaCodecAudioRenderer extends MediaCodecRenderer implements Media
   @Override
   @Nullable
   public MediaClock getMediaClock() {
-    if (getConfiguration().tunneling) {
-      return null;
-    }
     return this;
   }
 
