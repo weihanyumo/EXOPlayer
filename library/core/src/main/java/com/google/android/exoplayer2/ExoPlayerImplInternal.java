@@ -347,6 +347,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
   }
 
   public void seekTo(Timeline timeline, int windowIndex, long positionUs) {
+    android.util.Log.d(TAG, "seekTo: "+ positionUs);
     handler
         .obtainMessage(MSG_SEEK_TO, new SeekPosition(timeline, windowIndex, positionUs))
         .sendToTarget();

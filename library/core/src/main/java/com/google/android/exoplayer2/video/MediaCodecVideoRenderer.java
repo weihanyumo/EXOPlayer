@@ -2037,6 +2037,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
      * calling this method.
      */
     public void flush() {
+      android.util.Log.d(TAG, "flush: ");
       checkStateNotNull(videoFrameProcessor);
       videoFrameProcessor.flush();
       processedFramesTimestampsUs.clear();

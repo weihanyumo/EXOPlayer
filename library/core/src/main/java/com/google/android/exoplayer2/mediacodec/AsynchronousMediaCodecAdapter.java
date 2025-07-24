@@ -184,6 +184,7 @@ import java.nio.ByteBuffer;
   @Override
   public void queueInputBuffer(
       int index, int offset, int size, long presentationTimeUs, int flags) {
+    Log.d("TAG", "queueInputBufferpts: "+ presentationTimeUs);
     bufferEnqueuer.queueInputBuffer(index, offset, size, presentationTimeUs, flags);
   }
 
@@ -197,16 +198,16 @@ import java.nio.ByteBuffer;
   public void releaseOutputBuffer(int index, boolean render) {
     if(glSurfaceView != null ){
       if (render) {
-//        VideoDecoderOutputBuffer videoOutputBuffer = new VideoDecoderOutputBuffer(this::releaseOutputBuffer);
-//        videoOutputBuffer.index = index;
-//        ByteBuffer buffer = codec.getOutputBuffer(index);
-//        MediaFormat format = codec.getOutputFormat();
-//        int width = format.getInteger(MediaFormat.KEY_WIDTH);
-//        int height = format.getInteger(MediaFormat.KEY_HEIGHT);
-//        int yStride = format.getInteger(MediaFormat.KEY_STRIDE);
-//        videoOutputBuffer.data = deepCopyVisible(buffer);
-//        videoOutputBuffer.initForYuvFrame(width, height, yStride, yStride / 2, VideoDecoderOutputBuffer.COLORSPACE_BT709);
-//        glSurfaceView.setOutputBuffer(videoOutputBuffer);
+        VideoDecoderOutputBuffer videoOutputBuffer = new VideoDecoderOutputBuffer(this::releaseOutputBuffer);
+        videoOutputBuffer.index = index;
+        ByteBuffer buffer = codec.getOutputBuffer(index);
+        MediaFormat format = codec.getOutputFormat();
+        int width = format.getInteger(MediaFormat.KEY_WIDTH);
+        int height = format.getInteger(MediaFormat.KEY_HEIGHT);
+        int yStride = format.getInteger(MediaFormat.KEY_STRIDE);
+        videoOutputBuffer.data = deepCopyVisible(buffer);
+        videoOutputBuffer.initForYuvFrame(width, height, yStride, yStride / 2, VideoDecoderOutputBuffer.COLORSPACE_BT709);
+        glSurfaceView.setOutputBuffer(videoOutputBuffer);
       }
       codec.releaseOutputBuffer(index, false);
     } else {
@@ -217,20 +218,21 @@ import java.nio.ByteBuffer;
   @Override
   public void releaseOutputBuffer(int index, long renderTimeStampNs) {
     if(glSurfaceView != null){
-//      VideoDecoderOutputBuffer videoOutputBuffer = new VideoDecoderOutputBuffer(this::releaseOutputBuffer);
-//      videoOutputBuffer.index = index;
-//      ByteBuffer buffer = codec.getOutputBuffer(index);
-//      MediaFormat format = codec.getOutputFormat();
-//      int width = format.getInteger(MediaFormat.KEY_WIDTH);
-//      int height = format.getInteger(MediaFormat.KEY_HEIGHT);
-//      int yStride = format.getInteger(MediaFormat.KEY_STRIDE);
-//      videoOutputBuffer.data = deepCopyVisible(buffer);
-//      videoOutputBuffer.initForYuvFrame(width, height,yStride,yStride/2,VideoDecoderOutputBuffer.COLORSPACE_BT709);
-//      glSurfaceView.setOutputBuffer(videoOutputBuffer);
+      VideoDecoderOutputBuffer videoOutputBuffer = new VideoDecoderOutputBuffer(this::releaseOutputBuffer);
+      videoOutputBuffer.index = index;
+      ByteBuffer buffer = codec.getOutputBuffer(index);
+      MediaFormat format = codec.getOutputFormat();
+      int width = format.getInteger(MediaFormat.KEY_WIDTH);
+      int height = format.getInteger(MediaFormat.KEY_HEIGHT);
+      int yStride = format.getInteger(MediaFormat.KEY_STRIDE);
+      videoOutputBuffer.data = deepCopyVisible(buffer);
+      videoOutputBuffer.initForYuvFrame(width, height,yStride,yStride/2,VideoDecoderOutputBuffer.COLORSPACE_BT709);
+      glSurfaceView.setOutputBuffer(videoOutputBuffer);
       Log.d("MediaCodecAdapter", "releaseOutputBuffer: "+index);
       codec.releaseOutputBuffer(index, false);
 
     } else {
+      Log.d("TAG", "releaseOutputBuffer: "+ renderTimeStampNs);
       codec.releaseOutputBuffer(index, renderTimeStampNs);
     }
   }
