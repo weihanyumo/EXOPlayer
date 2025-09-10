@@ -1865,7 +1865,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
       android.util.Log.d(TAG, "getMediaFormat: lowLatency 1");
       mediaFormat.setInteger(MediaFormat.KEY_LOW_LATENCY, 1);
     }
-
+    mediaFormat.setInteger("vendor.scaling-freeze-mode.enable", 1);
     return mediaFormat;
   }
 
@@ -2852,7 +2852,7 @@ public class MediaCodecVideoRenderer extends MediaCodecRenderer {
       // This was fixed in https://android-review.googlesource.com/1156807.
       //
       // The workaround queues the event for subsequent processing, where the lock will not be held.
-      android.util.Log.d(TAG, "onFrameRendered playerId: "+ playerID + " pts: "+ presentationTimeUs);
+//      android.util.Log.d(TAG, "onFrameRendered playerId: "+ playerID + " pts: "+ presentationTimeUs);
       if (Util.SDK_INT < 30) {
         Message message =
             Message.obtain(
