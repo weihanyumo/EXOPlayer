@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
  apply from: "$gradle.ext.exoplayerSettingsDir/common_library_config.gradle"
-
+android{
+    namespace "com.google.android.exoplayer2.ext.cronet"
+}
 dependencies {
     api "com.google.android.gms:play-services-cronet:18.0.1"
     implementation project(modulePrefix + 'library-common')
