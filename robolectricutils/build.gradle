@@ -12,9 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
  apply from: "$gradle.ext.exoplayerSettingsDir/common_library_config.gradle"
-android {
-    namespace "com.google.android.exoplayer2.robolectricutils"
-}
+
 dependencies {
     compileOnly 'org.checkerframework:checker-qual:' + checkerframeworkVersion
     compileOnly 'org.checkerframework:checker-compat-qual:' + checkerframeworkCompatVersion

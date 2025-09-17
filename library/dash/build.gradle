@@ -14,7 +14,6 @@
  apply from: "$gradle.ext.exoplayerSettingsDir/common_library_config.gradle"
 
 android {
-    namespace "com.google.android.exoplayer2.dash"
     buildTypes {
         debug {
             testCoverageEnabled = true
